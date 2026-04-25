@@ -1,0 +1,28 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# User secrets
+**/secrets.json
+
+# Frontend build artifacts
+frontend/**/wwwroot/_framework/
+
+# Environment files
+*.env
