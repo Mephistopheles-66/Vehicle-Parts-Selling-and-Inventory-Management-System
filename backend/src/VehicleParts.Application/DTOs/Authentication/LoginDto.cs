@@ -1,0 +1,8 @@
+namespace VehicleParts.Application.DTOs.Authentication;
+
+public class LoginDto
+{
+    public string EmailAddressOrUsername { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+}

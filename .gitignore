@@ -26,3 +26,27 @@ frontend/**/wwwroot/_framework/
 
 # Environment files
 *.env
+
+!appsettings.json
+!appsettings.example.json
+appsettings.Development.json
+
+!authentication.json
+!authentication.example.json
+authentication.Development.json
+
+!client.json
+!client.example.json
+client.Development.json
+
+!database.json
+!database.example.json
+database.Development.json
+
+!seed.json
+!seed.example.json
+seed.Development.json
+
+!smtp.json
+!smtp.example.json
+smtp.Development.json
