@@ -32,6 +32,16 @@ public class ApplicationDbContext(
     public DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
     #endregion
 
+    #region Customer & Sales
+    public DbSet<Customer> Customers { get; set; }
+
+    public DbSet<Vehicle> Vehicles { get; set; }
+
+    public DbSet<SalesInvoice> SalesInvoices { get; set; }
+
+    public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+    #endregion
+
     #region Modules
     public DbSet<EmailOutbox> EmailOutboxes { get; set; }
     #endregion
