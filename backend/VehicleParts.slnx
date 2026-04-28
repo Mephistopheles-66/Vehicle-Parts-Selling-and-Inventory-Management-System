@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/VehicleParts.Api/VehicleParts.Api.csproj" />
+    <Project Path="src/VehicleParts.API/VehicleParts.API.csproj" />
     <Project Path="src/VehicleParts.Application/VehicleParts.Application.csproj" />
     <Project Path="src/VehicleParts.Domain/VehicleParts.Domain.csproj" />
     <Project Path="src/VehicleParts.Infrastructure/VehicleParts.Infrastructure.csproj" />
