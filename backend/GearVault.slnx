@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src\GearVault.API\GearVault.API.csproj" />
+    <Project Path="src\GearVault.Application\GearVault.Application.csproj" />
+    <Project Path="src\GearVault.Domain\GearVault.Domain.csproj" />
+    <Project Path="src\GearVault.Infrastructure\GearVault.Infrastructure.csproj" />
+  </Folder>
+</Solution>

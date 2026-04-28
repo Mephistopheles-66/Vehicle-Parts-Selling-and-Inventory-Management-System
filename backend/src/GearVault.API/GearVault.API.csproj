@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
+    <RootNamespace>GearVault.API</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.18" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GearVault.Application\GearVault.Application.csproj" />
+    <ProjectReference Include="..\GearVault.Infrastructure\GearVault.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Configurations\client.Development.json">
+      <DependentUpon>client.json</DependentUpon>
+    </Content>
+    <Content Update="Configurations\database.Development.json">
+      <DependentUpon>database.json</DependentUpon>
+    </Content>
+    <Content Update="Configurations\jwt.Development.json">
+      <DependentUpon>jwt.json</DependentUpon>
+    </Content>
+    <Content Update="Configurations\seed.Development.json">
+      <DependentUpon>seed.json</DependentUpon>
+    </Content>
+    <Content Update="Configurations\smtp.Development.json">
+      <DependentUpon>smtp.json</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+</Project>
