@@ -13,6 +13,16 @@ public interface IApplicationDbContext : IScopedService
     DbSet<Role> Roles { get; set; }
     #endregion
 
+    #region Inventory & Purchasing
+    DbSet<Part> Parts { get; set; }
+
+    DbSet<Vendor> Vendors { get; set; }
+
+    DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+
+    DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
+    #endregion
+
     #region Modules
     DbSet<EmailOutbox> EmailOutboxes { get; set; }
     #endregion

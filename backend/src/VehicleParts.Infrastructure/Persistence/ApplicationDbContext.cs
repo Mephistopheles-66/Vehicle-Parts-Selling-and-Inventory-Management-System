@@ -22,6 +22,16 @@ public class ApplicationDbContext(
     public DbSet<Role> Roles { get; set; }
     #endregion
 
+    #region Inventory & Purchasing
+    public DbSet<Part> Parts { get; set; }
+
+    public DbSet<Vendor> Vendors { get; set; }
+
+    public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+
+    public DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
+    #endregion
+
     #region Modules
     public DbSet<EmailOutbox> EmailOutboxes { get; set; }
     #endregion

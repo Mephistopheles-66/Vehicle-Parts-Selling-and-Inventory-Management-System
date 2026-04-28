@@ -108,7 +108,7 @@ public static class InfrastructureServices
 
         #region CORS Configuration
         services.EnableCors(configuration);
-        #endregion"
+        #endregion
 
         #region Registration of Background Hosted Services
         services.AddHostedService<EmailOutboxService>();
