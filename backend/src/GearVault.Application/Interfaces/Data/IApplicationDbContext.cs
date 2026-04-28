@@ -23,6 +23,16 @@ public interface IApplicationDbContext : IScopedService
     DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
     #endregion
 
+    #region Customer & Sales
+    DbSet<Customer> Customers { get; set; }
+
+    DbSet<Vehicle> Vehicles { get; set; }
+
+    DbSet<SalesInvoice> SalesInvoices { get; set; }
+
+    DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+    #endregion
+
     #region Modules
     DbSet<EmailOutbox> EmailOutboxes { get; set; }
     #endregion
