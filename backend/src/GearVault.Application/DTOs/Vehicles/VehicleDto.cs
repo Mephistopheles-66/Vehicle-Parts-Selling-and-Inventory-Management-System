@@ -1,12 +1,16 @@
 ﻿using GearVault.Application.DTOs.Base;
+using GearVault.Application.DTOs.Users;
+using GearVault.Domain.Common.Enum;
 
 namespace GearVault.Application.DTOs.Vehicles;
 
 public class VehicleDto : BaseDto
 {
-    public Guid CustomerId { get; set; }
+    public UserDto Customer { get; set; } = new();
 
     public string VehicleNumber { get; set; } = string.Empty;
+
+    public string LicenseNumber { get; set; } = string.Empty;
 
     public string Make { get; set; } = string.Empty;
 
@@ -14,7 +18,5 @@ public class VehicleDto : BaseDto
 
     public int Year { get; set; }
 
-    public string? ChassisNumber { get; set; }
-
-    public string? EngineNumber { get; set; }
+    public FuelType FuelType { get; set; }
 }

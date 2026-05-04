@@ -1,8 +1,9 @@
+import type { Part } from './part'
+import type { Vendor } from './vendor'
+
 export interface PurchaseInvoiceLineItem {
   id: string
-  partId: string
-  partName: string
-  partNumber: string
+  part: Part
   quantity: number
   unitPrice: number
   total: number
@@ -10,8 +11,7 @@ export interface PurchaseInvoiceLineItem {
 
 export interface PurchaseInvoice {
   id: string
-  vendorId: string
-  vendorName: string
+  vendor: Vendor
   invoiceNo: string
   invoiceDate: string
   dueDate?: string

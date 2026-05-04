@@ -8,9 +8,16 @@ public sealed class VehicleConfigurations : IEntityTypeConfiguration<Vehicle>
 {
     public void Configure(EntityTypeBuilder<Vehicle> builder)
     {
+        builder.ConfigureAuditRelationships();
+
         builder
             .Property(x => x.VehicleNumber)
             .HasMaxLength(20)
+            .IsRequired();
+
+        builder
+            .Property(x => x.LicenseNumber)
+            .HasMaxLength(30)
             .IsRequired();
 
         builder
@@ -28,14 +35,16 @@ public sealed class VehicleConfigurations : IEntityTypeConfiguration<Vehicle>
             .IsRequired();
 
         builder
-            .Property(x => x.ChassisNumber)
-            .HasMaxLength(50)
-            .IsRequired(false);
+            .Property(x => x.FuelType)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .IsRequired();
 
         builder
-            .Property(x => x.EngineNumber)
-            .HasMaxLength(50)
-            .IsRequired(false);
+            .HasOne(x => x.User)
+            .WithMany(u => u.Vehicles)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(x => x.SalesInvoices)
@@ -48,6 +57,10 @@ public sealed class VehicleConfigurations : IEntityTypeConfiguration<Vehicle>
             .IsUnique();
 
         builder
-            .HasIndex(x => x.CustomerId);
+            .HasIndex(x => x.LicenseNumber)
+            .IsUnique();
+
+        builder
+            .HasIndex(x => x.UserId);
     }
 }

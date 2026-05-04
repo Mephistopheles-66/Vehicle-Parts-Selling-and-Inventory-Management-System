@@ -10,7 +10,7 @@ public interface ISalesInvoiceService : ITransientService
         int pageSize,
         out int rowCount,
         string? globalSearch = null,
-        Guid? customerId = null,
+        Guid? userId = null,
         string[]? orderBys = null);
 
     SalesInvoiceDto GetInvoiceById(Guid invoiceId);

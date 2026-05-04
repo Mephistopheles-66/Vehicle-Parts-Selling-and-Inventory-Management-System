@@ -8,9 +8,8 @@ public class PartDto
     public string? Description { get; set; }
     public string? Category { get; set; }
     public string Unit { get; set; } = string.Empty;
-    public int StockQty { get; set; }
+    public int StockQuantity { get; set; }
     public int ReorderLevel { get; set; }
-    public decimal CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }

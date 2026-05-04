@@ -32,18 +32,28 @@ public class ApplicationDbContext(
     public DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
     #endregion
 
-    #region Customer & Sales
-    public DbSet<Customer> Customers { get; set; }
-
+    #region Vehicle, Service & Sales
     public DbSet<Vehicle> Vehicles { get; set; }
 
     public DbSet<SalesInvoice> SalesInvoices { get; set; }
 
     public DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+
+    public DbSet<ServiceAppointment> ServiceAppointments { get; set; }
+
+    public DbSet<ServiceReview> ServiceReviews { get; set; }
+
+    public DbSet<UnavailablePartRequest> UnavailablePartRequests { get; set; }
+
+    public DbSet<ServiceRecord> ServiceRecords { get; set; }
+
+    public DbSet<PartFailurePrediction> PartFailurePredictions { get; set; }
     #endregion
 
     #region Modules
     public DbSet<EmailOutbox> EmailOutboxes { get; set; }
+
+    public DbSet<AdminNotification> AdminNotifications { get; set; }
     #endregion
 
     #region Functions

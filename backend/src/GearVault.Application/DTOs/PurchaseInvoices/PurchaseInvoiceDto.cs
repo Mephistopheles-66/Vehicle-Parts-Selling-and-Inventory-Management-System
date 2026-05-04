@@ -1,10 +1,11 @@
+using GearVault.Application.DTOs.Vendors;
+
 namespace GearVault.Application.DTOs.PurchaseInvoices;
 
 public class PurchaseInvoiceDto
 {
     public Guid Id { get; set; }
-    public Guid VendorId { get; set; }
-    public string VendorName { get; set; } = string.Empty;
+    public VendorDto Vendor { get; set; } = new();
     public string InvoiceNo { get; set; } = string.Empty;
     public DateTime InvoiceDate { get; set; }
     public DateTime? DueDate { get; set; }

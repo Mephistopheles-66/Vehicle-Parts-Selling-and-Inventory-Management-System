@@ -56,7 +56,6 @@ export default function PartEditPage() {
             category: part.category,
             unit: part.unit,
             reorderLevel: part.reorderLevel,
-            costPrice: part.costPrice,
             sellingPrice: part.sellingPrice,
             isActive: part.isActive,
           }}

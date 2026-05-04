@@ -23,7 +23,7 @@ public class SalesInvoiceService(
         int pageSize,
         out int rowCount,
         string? globalSearch = null,
-        Guid? customerId = null,
+        Guid? userId = null,
         string[]? orderBys = null)
     {
         var invoices = genericRepository.GetPagedResult<SalesInvoice>(
@@ -33,7 +33,7 @@ public class SalesInvoiceService(
             x =>
                 (string.IsNullOrEmpty(globalSearch)
                     || x.InvoiceNumber.ToLower().Contains(globalSearch.ToLower())) &&
-                (customerId == null || x.CustomerId == customerId.Value),
+                (userId == null || x.Vehicle!.UserId == userId.Value),
             orderBys ?? new[] { "CreatedAt desc" }).ToList();
 
         if (invoices.Count == 0) return new List<SalesInvoiceDto>();
@@ -59,27 +59,20 @@ public class SalesInvoiceService(
         if (dto.Items.Any(i => i.Quantity <= 0))
             throw new BadRequestException("All item quantities must be greater than zero.");
 
-        // 1. Validate customer.
-        var customer = genericRepository.GetById<Customer>(dto.CustomerId)
-            ?? throw new NotFoundException($"Customer with identifier '{dto.CustomerId}' was not found.");
+        // 1. Validate vehicle and owner user.
+        var vehicle = genericRepository.GetById<Vehicle>(dto.VehicleId)
+            ?? throw new NotFoundException($"Vehicle with identifier '{dto.VehicleId}' was not found.");
 
-        // 2. Validate vehicle (if specified) belongs to the customer.
-        if (dto.VehicleId.HasValue)
-        {
-            var vehicle = genericRepository.GetById<Vehicle>(dto.VehicleId.Value)
-                ?? throw new NotFoundException($"Vehicle with identifier '{dto.VehicleId}' was not found.");
+        var user = genericRepository.GetById<User>(vehicle.UserId)
+            ?? throw new NotFoundException($"User with identifier '{vehicle.UserId}' was not found.");
 
-            if (vehicle.CustomerId != customer.Id)
-                throw new BadRequestException("The selected vehicle does not belong to the specified customer.");
-        }
-
-        // 3. Resolve staff (current authenticated user).
+        // 2. Resolve staff (current authenticated user).
         if (!applicationUserService.IsAuthenticated)
             throw new UnauthorizedException("Cannot create an invoice without an authenticated staff user.");
 
         var staffId = applicationUserService.GetUserId;
 
-        // 4. Load all parts referenced in this invoice.
+        // 3. Load all parts referenced in this invoice.
         var partIds = dto.Items.Select(i => i.PartId).Distinct().ToList();
         var parts = genericRepository.Get<Part>(p => partIds.Contains(p.Id))
             .ToDictionary(p => p.Id, p => p);
@@ -90,8 +83,8 @@ public class SalesInvoiceService(
             throw new NotFoundException($"Parts not found: {string.Join(", ", missing)}.");
         }
 
-        // 5. Validate stock and build invoice line snapshots.
-        var lineSnapshots = new List<(Guid PartId, string Name, int Quantity, decimal UnitPrice, decimal LineTotal)>();
+        // 4. Validate stock and build invoice line snapshots.
+        var lineSnapshots = new List<(Guid PartId, int Quantity, decimal UnitPrice, decimal LineTotal)>();
         decimal subTotal = 0m;
 
         foreach (var requestedItem in dto.Items)
@@ -101,26 +94,25 @@ public class SalesInvoiceService(
             if (!part.IsActive)
                 throw new BadRequestException($"Part '{part.Name}' is inactive and cannot be sold.");
 
-            if (part.StockQty < requestedItem.Quantity)
+            if (part.StockQuantity < requestedItem.Quantity)
                 throw new BadRequestException(
-                    $"Insufficient stock for part '{part.Name}'. Available: {part.StockQty}, Requested: {requestedItem.Quantity}.");
+                    $"Insufficient stock for part '{part.Name}'. Available: {part.StockQuantity}, Requested: {requestedItem.Quantity}.");
 
             var lineTotal = part.SellingPrice * requestedItem.Quantity;
             subTotal += lineTotal;
 
-            lineSnapshots.Add((part.Id, part.Name, requestedItem.Quantity, part.SellingPrice, lineTotal));
+            lineSnapshots.Add((part.Id, requestedItem.Quantity, part.SellingPrice, lineTotal));
         }
 
-        // 6. Apply loyalty discount (10% off when subtotal > 5000).
+        // 5. Apply loyalty discount (10% off when subtotal > 5000).
         var discount = subTotal > LoyaltyThreshold
             ? Math.Round(subTotal * LoyaltyDiscountRate, 2)
             : 0m;
         var totalAmount = subTotal - discount;
 
-        // 7. Persist invoice + items.
+        // 6. Persist invoice + items.
         var invoice = new SalesInvoice(
             invoiceNumber: GenerateInvoiceNumber(),
-            customerId: customer.Id,
             vehicleId: dto.VehicleId,
             staffId: staffId,
             subTotal: subTotal,
@@ -137,7 +129,6 @@ public class SalesInvoiceService(
         var itemEntities = lineSnapshots.Select(line => new SalesInvoiceItem(
             invoiceId,
             line.PartId,
-            line.Name,
             line.Quantity,
             line.UnitPrice,
             line.LineTotal
@@ -145,7 +136,7 @@ public class SalesInvoiceService(
 
         genericRepository.AddMultipleEntity(itemEntities);
 
-        // 8. Decrement stock — AdjustStock takes a delta, so pass NEGATIVE for sales.
+        // 7. Decrement stock. AdjustStock takes a delta, so pass negative for sales.
         foreach (var requestedItem in dto.Items)
         {
             var part = parts[requestedItem.PartId];
@@ -153,10 +144,10 @@ public class SalesInvoiceService(
             genericRepository.Update(part);
         }
 
-        // 9. Queue email if requested and customer has an email address.
-        if (dto.SendEmail && !string.IsNullOrWhiteSpace(customer.EmailAddress))
+        // 8. Queue email if requested and user has an email address.
+        if (dto.SendEmail && !string.IsNullOrWhiteSpace(user.EmailAddress))
         {
-            QueueInvoiceEmail(invoice, customer);
+            QueueInvoiceEmail(invoice, user);
             invoice.MarkEmailSent();
             genericRepository.Update(invoice);
         }
@@ -169,13 +160,16 @@ public class SalesInvoiceService(
         var invoice = genericRepository.GetById<SalesInvoice>(invoiceId)
             ?? throw new NotFoundException($"Invoice with identifier '{invoiceId}' was not found.");
 
-        var customer = genericRepository.GetById<Customer>(invoice.CustomerId)
-            ?? throw new NotFoundException("Customer for this invoice was not found.");
+        var vehicle = genericRepository.GetById<Vehicle>(invoice.VehicleId)
+            ?? throw new NotFoundException("Vehicle for this invoice was not found.");
 
-        if (string.IsNullOrWhiteSpace(customer.EmailAddress))
-            throw new BadRequestException("Customer does not have an email address on file.");
+        var user = genericRepository.GetById<User>(vehicle.UserId)
+            ?? throw new NotFoundException("User for this invoice was not found.");
 
-        QueueInvoiceEmail(invoice, customer);
+        if (string.IsNullOrWhiteSpace(user.EmailAddress))
+            throw new BadRequestException("User does not have an email address on file.");
+
+        QueueInvoiceEmail(invoice, user);
 
         invoice.MarkEmailSent();
         genericRepository.Update(invoice);
@@ -185,17 +179,17 @@ public class SalesInvoiceService(
     #region Helpers — Hydration
     private List<SalesInvoiceDto> HydrateInvoices(List<SalesInvoice> invoices)
     {
-        var customerIds = invoices.Select(i => i.CustomerId).Distinct().ToHashSet();
-        var vehicleIds = invoices.Where(i => i.VehicleId.HasValue).Select(i => i.VehicleId!.Value).Distinct().ToHashSet();
+        var vehicleIds = invoices.Select(i => i.VehicleId).Distinct().ToHashSet();
         var staffIds = invoices.Select(i => i.StaffId).Distinct().ToHashSet();
         var invoiceIds = invoices.Select(i => i.Id).ToHashSet();
 
-        var customers = genericRepository.Get<Customer>(c => customerIds.Contains(c.Id))
-            .ToDictionary(c => c.Id, c => c);
+        var vehicles = genericRepository.Get<Vehicle>(v => vehicleIds.Contains(v.Id))
+            .ToDictionary(v => v.Id, v => v);
 
-        var vehicles = vehicleIds.Count > 0
-            ? genericRepository.Get<Vehicle>(v => vehicleIds.Contains(v.Id)).ToDictionary(v => v.Id, v => v)
-            : new Dictionary<Guid, Vehicle>();
+        var userIds = vehicles.Values.Select(v => v.UserId).Distinct().ToHashSet();
+
+        var users = genericRepository.Get<User>(u => userIds.Contains(u.Id))
+            .ToDictionary(u => u.Id, u => u);
 
         var staff = genericRepository.Get<User>(u => staffIds.Contains(u.Id))
             .ToDictionary(u => u.Id, u => u);
@@ -204,20 +198,35 @@ public class SalesInvoiceService(
             .GroupBy(i => i.SalesInvoiceId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
+        var partIds = items.Values
+            .SelectMany(invoiceItems => invoiceItems)
+            .Select(i => i.PartId)
+            .Distinct()
+            .ToHashSet();
+
+        var parts = genericRepository.Get<Part>(p => partIds.Contains(p.Id))
+            .ToDictionary(p => p.Id, p => p);
+
         return invoices.Select(invoice =>
         {
-            if (!customers.TryGetValue(invoice.CustomerId, out var customer))
-                throw new NotFoundException($"Customer for invoice '{invoice.InvoiceNumber}' is missing.");
+            if (!vehicles.TryGetValue(invoice.VehicleId, out var vehicle))
+                throw new NotFoundException($"Vehicle for invoice '{invoice.InvoiceNumber}' is missing.");
 
-            Vehicle? vehicle = null;
-            if (invoice.VehicleId.HasValue)
-                vehicles.TryGetValue(invoice.VehicleId.Value, out vehicle);
+            if (!users.TryGetValue(vehicle.UserId, out var user))
+                throw new NotFoundException($"User for invoice '{invoice.InvoiceNumber}' is missing.");
 
             staff.TryGetValue(invoice.StaffId, out var staffUser);
 
             var invoiceItems = items.GetValueOrDefault(invoice.Id) ?? new List<SalesInvoiceItem>();
+            foreach (var item in invoiceItems)
+            {
+                if (parts.TryGetValue(item.PartId, out var part))
+                {
+                    item.Part = part;
+                }
+            }
 
-            return invoice.ToSalesInvoiceDto(customer, vehicle, staffUser, invoiceItems);
+            return invoice.ToSalesInvoiceDto(user, vehicle, staffUser, invoiceItems);
         }).ToList();
     }
     #endregion
@@ -238,15 +247,15 @@ public class SalesInvoiceService(
     #endregion
 
     #region Helpers — Email
-    private void QueueInvoiceEmail(SalesInvoice invoice, Customer customer)
+    private void QueueInvoiceEmail(SalesInvoice invoice, User user)
     {
-        if (string.IsNullOrWhiteSpace(customer.EmailAddress)) return;
+        if (string.IsNullOrWhiteSpace(user.EmailAddress)) return;
 
         var payload = new
         {
             InvoiceId = invoice.Id,
             InvoiceNumber = invoice.InvoiceNumber,
-            CustomerName = customer.FullName,
+            UserName = user.Name,
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
             TotalAmount = invoice.TotalAmount,
@@ -254,8 +263,8 @@ public class SalesInvoiceService(
         };
 
         var outbox = new EmailOutbox(
-            toEmail: customer.EmailAddress,
-            name: customer.FullName,
+            toEmail: user.EmailAddress,
+            name: user.Name,
             subject: $"Your Invoice {invoice.InvoiceNumber}",
             process: EmailProcess.SalesInvoiceCreated,
             payloadJson: JsonSerializer.Serialize(payload));

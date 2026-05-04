@@ -9,9 +9,8 @@ public class Part(
     string? description,
     string? category,
     UnitType unit,
-    int stockQty,
+    int stockQuantity,
     int reorderLevel,
-    decimal costPrice,
     decimal sellingPrice
 ) : BaseEntity<Guid>
 {
@@ -25,15 +24,15 @@ public class Part(
 
     public UnitType Unit { get; private set; } = unit;
 
-    public int StockQty { get; private set; } = stockQty;
+    public int StockQuantity { get; private set; } = stockQuantity;
 
     public int ReorderLevel { get; private set; } = reorderLevel;
-
-    public decimal CostPrice { get; private set; } = costPrice;
 
     public decimal SellingPrice { get; private set; } = sellingPrice;
 
     public DateTime UpdatedAt { get; private set; } = DateTime.Now;
+
+    public virtual ICollection<PartFailurePrediction>? PartFailurePredictions { get; set; }
 
     public void Update(
         string partNumber,
@@ -42,7 +41,6 @@ public class Part(
         string? category,
         UnitType unit,
         int reorderLevel,
-        decimal costPrice,
         decimal sellingPrice,
         bool isActive)
     {
@@ -52,7 +50,6 @@ public class Part(
         Category = category;
         Unit = unit;
         ReorderLevel = reorderLevel;
-        CostPrice = costPrice;
         SellingPrice = sellingPrice;
         IsActive = isActive;
         UpdatedAt = DateTime.Now;
@@ -60,7 +57,7 @@ public class Part(
 
     public void AdjustStock(int quantityChange)
     {
-        StockQty += quantityChange;
+        StockQuantity += quantityChange;
         UpdatedAt = DateTime.Now;
     }
 }

@@ -147,7 +147,7 @@ export default function PurchaseInvoicesListPage() {
             {data.map((invoice) => (
               <TableRow key={invoice.id}>
                 <TableCell className="font-mono">{invoice.invoiceNo}</TableCell>
-                <TableCell>{invoice.vendorName}</TableCell>
+                <TableCell>{invoice.vendor.name}</TableCell>
                 <TableCell>
                   {new Date(invoice.invoiceDate).toLocaleDateString('en-IN', {
                     day: '2-digit',

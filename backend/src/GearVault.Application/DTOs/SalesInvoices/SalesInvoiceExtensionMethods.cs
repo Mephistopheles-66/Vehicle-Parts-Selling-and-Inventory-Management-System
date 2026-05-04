@@ -1,17 +1,19 @@
 ﻿using GearVault.Domain.Entities;
+using GearVault.Application.DTOs.Parts;
+using GearVault.Application.DTOs.Users;
+using GearVault.Application.DTOs.Vehicles;
 
 namespace GearVault.Application.DTOs.SalesInvoices;
 
 public static class SalesInvoiceExtensionMethods
 {
-    public static SalesInvoiceItemDto ToSalesInvoiceItemDto(this SalesInvoiceItem item)
+    public static SalesInvoiceItemDto ToSalesInvoiceItemDto(this SalesInvoiceItem item, Part? part = null)
     {
         return new SalesInvoiceItemDto
         {
             Id = item.Id,
             SalesInvoiceId = item.SalesInvoiceId,
-            PartId = item.PartId,
-            PartName = item.PartName,
+            Part = (part ?? item.Part)?.ToPartDto() ?? new(),
             Quantity = item.Quantity,
             UnitPrice = item.UnitPrice,
             LineTotal = item.LineTotal,
@@ -21,8 +23,8 @@ public static class SalesInvoiceExtensionMethods
 
     public static SalesInvoiceDto ToSalesInvoiceDto(
         this SalesInvoice invoice,
-        Customer customer,
-        Vehicle? vehicle,
+        User user,
+        Vehicle vehicle,
         User? staff,
         IEnumerable<SalesInvoiceItem>? items = null)
     {
@@ -30,14 +32,9 @@ public static class SalesInvoiceExtensionMethods
         {
             Id = invoice.Id,
             InvoiceNumber = invoice.InvoiceNumber,
-            CustomerId = invoice.CustomerId,
-            CustomerName = customer.FullName,
-            CustomerPhone = customer.PhoneNumber,
-            CustomerEmail = customer.EmailAddress,
-            VehicleId = invoice.VehicleId,
-            VehicleNumber = vehicle?.VehicleNumber,
-            StaffId = invoice.StaffId,
-            StaffName = staff?.Name,
+            Customer = user.ToUserDto(),
+            Vehicle = vehicle.ToVehicleDto(user),
+            Staff = staff?.ToUserDto() ?? new(),
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
             TotalAmount = invoice.TotalAmount,

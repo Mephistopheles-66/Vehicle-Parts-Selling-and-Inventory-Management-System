@@ -9,11 +9,6 @@ public sealed class SalesInvoiceItemConfigurations : IEntityTypeConfiguration<Sa
     public void Configure(EntityTypeBuilder<SalesInvoiceItem> builder)
     {
         builder
-            .Property(x => x.PartName)
-            .HasMaxLength(150)
-            .IsRequired();
-
-        builder
             .Property(x => x.Quantity)
             .IsRequired();
 

@@ -1,8 +1,14 @@
-﻿namespace GearVault.Application.DTOs.Vehicles;
+﻿using GearVault.Domain.Common.Enum;
+
+namespace GearVault.Application.DTOs.Vehicles;
 
 public class CreateVehicleDto
 {
+    public Guid UserId { get; set; }
+
     public string VehicleNumber { get; set; } = string.Empty;
+
+    public string LicenseNumber { get; set; } = string.Empty;
 
     public string Make { get; set; } = string.Empty;
 
@@ -10,7 +16,5 @@ public class CreateVehicleDto
 
     public int Year { get; set; }
 
-    public string? ChassisNumber { get; set; }
-
-    public string? EngineNumber { get; set; }
+    public FuelType FuelType { get; set; } = FuelType.Gas;
 }

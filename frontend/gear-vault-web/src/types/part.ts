@@ -5,9 +5,8 @@ export interface Part {
   description?: string
   category?: string
   unit: 'PIECE' | 'BOX' | 'METER' | 'LITER' | 'KG'
-  stockQty: number
+  stockQuantity: number
   reorderLevel: number
-  costPrice: number
   sellingPrice: number
   isActive: boolean
   createdAt: string
@@ -21,7 +20,6 @@ export interface CreatePartDto {
   category?: string
   unit: Part['unit']
   reorderLevel: number
-  costPrice: number
   sellingPrice: number
   isActive: boolean
 }

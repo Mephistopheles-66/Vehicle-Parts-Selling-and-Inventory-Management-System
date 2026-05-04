@@ -28,7 +28,6 @@ const partSchema = z.object({
   category: z.string().optional(),
   unit: z.enum(UNITS),
   reorderLevel: z.number({ invalid_type_error: 'Required' }).min(0, 'Must be 0 or greater'),
-  costPrice: z.number({ invalid_type_error: 'Required' }).min(0, 'Must be 0 or greater'),
   sellingPrice: z.number({ invalid_type_error: 'Required' }).min(0, 'Must be 0 or greater'),
   isActive: z.boolean(),
 })
@@ -56,7 +55,6 @@ export default function PartForm({ defaultValues, onSubmit, isLoading }: PartFor
       category: '',
       unit: 'PIECE',
       reorderLevel: 0,
-      costPrice: 0,
       sellingPrice: 0,
       isActive: true,
       ...defaultValues,
@@ -164,20 +162,6 @@ export default function PartForm({ defaultValues, onSubmit, isLoading }: PartFor
           />
           {errors.reorderLevel && (
             <p className="text-sm text-destructive">{errors.reorderLevel.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="costPrice">Cost Price (NPR)</Label>
-          <Input
-            id="costPrice"
-            type="number"
-            step="0.01"
-            min={0}
-            {...register('costPrice', { valueAsNumber: true })}
-          />
-          {errors.costPrice && (
-            <p className="text-sm text-destructive">{errors.costPrice.message}</p>
           )}
         </div>
 

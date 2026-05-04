@@ -39,6 +39,8 @@ public class User(
 
     public virtual Role? Role { get; set; }
 
+    public virtual ICollection<Vehicle>? Vehicles { get; set; }
+
     public void Update(Guid roleId, string name, string username, string emailAddress, string? address, string phoneNumber)
     {
         RoleId = roleId;

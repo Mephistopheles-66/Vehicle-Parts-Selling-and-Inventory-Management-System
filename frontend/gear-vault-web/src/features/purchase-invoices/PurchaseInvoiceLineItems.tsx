@@ -56,10 +56,9 @@ export default function PurchaseInvoiceLineItems({
   }
 
   const handlePartSelect = (index: number, partId: string) => {
-    const part = parts.find((p) => p.id === partId)
     updateItem(index, {
       partId,
-      unitPrice: part?.costPrice ?? 0,
+      unitPrice: 0,
     })
     setOpenPopover(null)
   }

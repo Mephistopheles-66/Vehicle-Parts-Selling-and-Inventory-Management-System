@@ -6,7 +6,6 @@ namespace GearVault.Domain.Entities;
 public class SalesInvoiceItem(
     Guid salesInvoiceId,
     Guid partId,
-    string partName,
     int quantity,
     decimal unitPrice,
     decimal lineTotal
@@ -17,9 +16,6 @@ public class SalesInvoiceItem(
 
     [ForeignKey(nameof(Part))]
     public Guid PartId { get; private set; } = partId;
-
-    // Snapshot — keeps the invoice readable even if the part is later renamed/deleted.
-    public string PartName { get; private set; } = partName;
 
     public int Quantity { get; private set; } = quantity;
 

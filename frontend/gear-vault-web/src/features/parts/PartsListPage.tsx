@@ -41,18 +41,18 @@ const formatNPR = (value: number) =>
   `NPR ${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`
 
 function getStatusBadge(part: Part) {
-  if (part.stockQty === 0) {
+  if (part.stockQuantity === 0) {
     return <Badge variant="destructive">Out of Stock</Badge>
   }
-  if (part.stockQty <= part.reorderLevel) {
+  if (part.stockQuantity <= part.reorderLevel) {
     return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Low Stock</Badge>
   }
   return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">In Stock</Badge>
 }
 
 function getRowClassName(part: Part) {
-  if (part.stockQty === 0) return 'opacity-60'
-  if (part.stockQty <= part.reorderLevel) return 'border-l-4 border-amber-400'
+  if (part.stockQuantity === 0) return 'opacity-60'
+  if (part.stockQuantity <= part.reorderLevel) return 'border-l-4 border-amber-400'
   return ''
 }
 
@@ -92,9 +92,9 @@ export default function PartsListPage() {
       }
     }
     if (category !== 'all' && part.category !== category) return false
-    if (statusFilter === 'in-stock') return part.stockQty > 0 && part.stockQty > part.reorderLevel
-    if (statusFilter === 'low-stock') return part.stockQty > 0 && part.stockQty <= part.reorderLevel
-    if (statusFilter === 'out-of-stock') return part.stockQty === 0
+    if (statusFilter === 'in-stock') return part.stockQuantity > 0 && part.stockQuantity > part.reorderLevel
+    if (statusFilter === 'low-stock') return part.stockQuantity > 0 && part.stockQuantity <= part.reorderLevel
+    if (statusFilter === 'out-of-stock') return part.stockQuantity === 0
     return true
   })
 
@@ -209,7 +209,7 @@ export default function PartsListPage() {
                   <TableCell>{part.name}</TableCell>
                   <TableCell>{part.category ?? '—'}</TableCell>
                   <TableCell>{part.unit}</TableCell>
-                  <TableCell className="text-right">{part.stockQty}</TableCell>
+                  <TableCell className="text-right">{part.stockQuantity}</TableCell>
                   <TableCell className="text-right">{part.reorderLevel}</TableCell>
                   <TableCell className="text-right">{formatNPR(part.sellingPrice)}</TableCell>
                   <TableCell>{getStatusBadge(part)}</TableCell>

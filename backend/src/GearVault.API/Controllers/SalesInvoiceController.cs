@@ -16,14 +16,14 @@ public class SalesInvoiceController(ISalesInvoiceService salesInvoiceService) : 
         [FromQuery] PaginationQueryDto paginationQuery,
         [FromQuery] SearchAndActiveFlagQueryDto searchAndActiveFlagQuery,
         [FromQuery] OrderQueryDto orderQuery,
-        [FromQuery] Guid? customerId = null)
+        [FromQuery] Guid? userId = null)
     {
         var result = salesInvoiceService.GetAllInvoices(
             paginationQuery.PageNumber,
             paginationQuery.PageSize,
             out var rowCount,
             searchAndActiveFlagQuery.GlobalSearch,
-            customerId,
+            userId,
             orderQuery.OrderBys);
 
         return new CollectionDto<SalesInvoiceDto>(

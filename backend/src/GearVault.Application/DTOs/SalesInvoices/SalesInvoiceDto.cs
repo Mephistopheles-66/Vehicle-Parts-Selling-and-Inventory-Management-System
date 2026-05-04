@@ -1,4 +1,6 @@
 ﻿using GearVault.Application.DTOs.Base;
+using GearVault.Application.DTOs.Users;
+using GearVault.Application.DTOs.Vehicles;
 using GearVault.Domain.Common.Enum;
 
 namespace GearVault.Application.DTOs.SalesInvoices;
@@ -7,21 +9,11 @@ public class SalesInvoiceDto : BaseDto
 {
     public string InvoiceNumber { get; set; } = string.Empty;
 
-    public Guid CustomerId { get; set; }
+    public UserDto Customer { get; set; } = new();
 
-    public string CustomerName { get; set; } = string.Empty;
+    public VehicleDto Vehicle { get; set; } = new();
 
-    public string CustomerPhone { get; set; } = string.Empty;
-
-    public string? CustomerEmail { get; set; }
-
-    public Guid? VehicleId { get; set; }
-
-    public string? VehicleNumber { get; set; }
-
-    public Guid StaffId { get; set; }
-
-    public string? StaffName { get; set; }
+    public UserDto Staff { get; set; } = new();
 
     public decimal SubTotal { get; set; }
 
