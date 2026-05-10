@@ -254,6 +254,26 @@ public class EmailOutboxService(
 
                     break;
                 }
+                case EmailProcess.AppointmentConfirmation:
+                {
+                    var appointmentPayload =
+                        JsonSerializer.Deserialize<AppointmentConfirmationPayloadDto>(emailOutbox.PayloadJson);
+
+                    if (appointmentPayload != null)
+                    {
+                        var appointment = genericRepository.GetById<Appointment>(
+                            appointmentPayload.AppointmentId,
+                            includeProperties: "Vehicle")
+                            ?? throw new NotFoundException($"Appointment with the identifier of {appointmentPayload.AppointmentId} was not found.");
+
+                        emailModel.VehicleNumber = appointment.Vehicle?.VehicleNumber ?? string.Empty;
+                        emailModel.VehicleMake = appointment.Vehicle?.Make ?? string.Empty;
+                        emailModel.VehicleModel = appointment.Vehicle?.Model ?? string.Empty;
+                        emailModel.AppointmentDate = appointment.ScheduledAt;
+                    }
+
+                    break;
+                }
                 default:
                     throw new NotSupportedException($"Email process '{emailOutbox.Process}' is not supported in the outbox handler.");
             }

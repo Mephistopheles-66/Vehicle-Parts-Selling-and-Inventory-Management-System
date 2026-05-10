@@ -43,4 +43,14 @@ public class EmailDto
 
     public string? VerificationCode { get; set; }
     #endregion
+
+    #region Appointment Fields
+    public string? VehicleNumber { get; set; }
+
+    public string? VehicleMake { get; set; }
+
+    public string? VehicleModel { get; set; }
+
+    public DateTime? AppointmentDate { get; set; }
+    #endregion
 }

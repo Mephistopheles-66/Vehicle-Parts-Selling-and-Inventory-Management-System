@@ -48,6 +48,12 @@ public class ApplicationDbContext(
     public DbSet<ServiceRecord> ServiceRecords { get; set; }
 
     public DbSet<PartFailurePrediction> PartFailurePredictions { get; set; }
+
+    public DbSet<Appointment> Appointments { get; set; }
+
+    public DbSet<PartRequest> PartRequests { get; set; }
+
+    public DbSet<Review> Reviews { get; set; }
     #endregion
 
     #region Modules

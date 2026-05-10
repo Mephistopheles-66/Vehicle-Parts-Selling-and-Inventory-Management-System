@@ -1,4 +1,4 @@
-﻿using GearVault.Domain.Common.Base;
+using GearVault.Domain.Common.Base;
 using GearVault.Domain.Common.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -40,6 +40,8 @@ public class Vehicle(
     public virtual ICollection<ServiceRecord>? ServiceRecords { get; set; }
 
     public virtual ICollection<PartFailurePrediction>? PartFailurePredictions { get; set; }
+
+    public virtual ICollection<Appointment>? Appointments { get; set; }
 
     public void Update(string vehicleNumber, string licenseNumber, string make, string model, int year, FuelType fuelType)
     {

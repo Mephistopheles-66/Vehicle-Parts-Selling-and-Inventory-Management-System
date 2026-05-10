@@ -1,4 +1,4 @@
-﻿using GearVault.Domain.Common.Enum;
+using GearVault.Domain.Common.Enum;
 
 namespace GearVault.Application.DTOs.Vehicles;
 

@@ -1,4 +1,4 @@
-﻿using GearVault.Application.DTOs.Base;
+using GearVault.Application.DTOs.Base;
 using GearVault.Application.DTOs.Users;
 using GearVault.Domain.Common.Enum;
 

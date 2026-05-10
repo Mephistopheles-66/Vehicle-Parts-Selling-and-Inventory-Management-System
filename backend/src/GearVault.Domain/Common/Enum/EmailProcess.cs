@@ -4,5 +4,6 @@ public enum EmailProcess
 {
     CustomerRegistration,
     UserRegistration,
+    AppointmentConfirmation,
     SalesInvoiceCreated
 }

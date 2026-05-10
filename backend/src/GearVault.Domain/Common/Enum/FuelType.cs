@@ -2,7 +2,11 @@ namespace GearVault.Domain.Common.Enum;
 
 public enum FuelType
 {
+    Petrol,
     Diesel,
     Gas,
-    Electric
+    Electric,
+    Hybrid,
+    CNG,
+    LPG
 }

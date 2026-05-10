@@ -103,6 +103,13 @@ public class EmailService(IWebHostEnvironment webHostEnvironment, IOptions<SmtpS
             case EmailProcess.UserRegistration:
                 result.Add(new("{{Password}}", email.Password ?? string.Empty));
                 break;
+
+            case EmailProcess.AppointmentConfirmation:
+                result.Add(new("{{VehicleNumber}}", email.VehicleNumber ?? string.Empty));
+                result.Add(new("{{VehicleMake}}", email.VehicleMake ?? string.Empty));
+                result.Add(new("{{VehicleModel}}", email.VehicleModel ?? string.Empty));
+                result.Add(new("{{AppointmentDate}}", email.AppointmentDate?.ToString("dd MMM yyyy HH:mm") ?? string.Empty));
+                break;
         }
 
         return result;

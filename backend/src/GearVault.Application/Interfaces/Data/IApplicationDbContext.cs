@@ -39,6 +39,12 @@ public interface IApplicationDbContext : IScopedService
     DbSet<ServiceRecord> ServiceRecords { get; set; }
 
     DbSet<PartFailurePrediction> PartFailurePredictions { get; set; }
+
+    DbSet<Appointment> Appointments { get; set; }
+
+    DbSet<PartRequest> PartRequests { get; set; }
+
+    DbSet<Review> Reviews { get; set; }
     #endregion
 
     #region Modules

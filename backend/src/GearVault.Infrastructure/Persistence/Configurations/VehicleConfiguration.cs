@@ -61,6 +61,12 @@ public sealed class VehicleConfigurations : IEntityTypeConfiguration<Vehicle>
             .IsUnique();
 
         builder
+            .HasMany(x => x.Appointments)
+            .WithOne(x => x.Vehicle)
+            .HasForeignKey(x => x.VehicleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
             .HasIndex(x => x.UserId);
     }
 }
