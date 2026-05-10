@@ -14,7 +14,7 @@ public static class AppointmentExtensionMethod
             ScheduledAt = appointment.ScheduledAt,
             Notes = appointment.Notes,
             Status = appointment.Status.ToString().ToUpper(),
-            VehiclePlateNumber = appointment.Vehicle?.PlateNumber ?? string.Empty,
+            VehicleNumber = appointment.Vehicle?.VehicleNumber ?? string.Empty,
             VehicleMake = appointment.Vehicle?.Make ?? string.Empty,
             VehicleModel = appointment.Vehicle?.Model ?? string.Empty,
             IsActive = appointment.IsActive,

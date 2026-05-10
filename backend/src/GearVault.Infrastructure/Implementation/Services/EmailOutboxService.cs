@@ -266,7 +266,7 @@ public class EmailOutboxService(
                             includeProperties: "Vehicle")
                             ?? throw new NotFoundException($"Appointment with the identifier of {appointmentPayload.AppointmentId} was not found.");
 
-                        emailModel.VehiclePlateNumber = appointment.Vehicle?.PlateNumber ?? string.Empty;
+                        emailModel.VehicleNumber = appointment.Vehicle?.VehicleNumber ?? string.Empty;
                         emailModel.VehicleMake = appointment.Vehicle?.Make ?? string.Empty;
                         emailModel.VehicleModel = appointment.Vehicle?.Model ?? string.Empty;
                         emailModel.AppointmentDate = appointment.ScheduledAt;

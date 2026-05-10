@@ -49,7 +49,7 @@ public class AppointmentService(
         var vehicle = genericRepository.GetById<Vehicle>(dto.VehicleId, asNoTracking: true)
             ?? throw new NotFoundException("Vehicle not found.");
 
-        if (vehicle.OwnerUserId != userId)
+        if (vehicle.UserId != userId)
             throw new NotFoundException("Vehicle not found.");
 
         var appointment = new Appointment(dto.VehicleId, userId, dto.ScheduledAt, dto.Notes);

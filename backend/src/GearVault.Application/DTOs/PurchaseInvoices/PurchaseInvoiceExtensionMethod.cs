@@ -1,4 +1,6 @@
 using GearVault.Domain.Entities;
+using GearVault.Application.DTOs.Parts;
+using GearVault.Application.DTOs.Vendors;
 
 namespace GearVault.Application.DTOs.PurchaseInvoices;
 
@@ -9,8 +11,7 @@ public static class PurchaseInvoiceExtensionMethod
         return new PurchaseInvoiceDto
         {
             Id = invoice.Id,
-            VendorId = invoice.VendorId,
-            VendorName = invoice.Vendor?.Name ?? string.Empty,
+            Vendor = invoice.Vendor?.ToVendorDto() ?? new(),
             InvoiceNo = invoice.InvoiceNo,
             InvoiceDate = invoice.InvoiceDate,
             DueDate = invoice.DueDate,
@@ -32,9 +33,7 @@ public static class PurchaseInvoiceExtensionMethod
         return new PurchaseInvoiceLineItemDto
         {
             Id = lineItem.Id,
-            PartId = lineItem.PartId,
-            PartName = lineItem.Part?.Name ?? string.Empty,
-            PartNumber = lineItem.Part?.PartNumber ?? string.Empty,
+            Part = lineItem.Part?.ToPartDto() ?? new(),
             Quantity = lineItem.Quantity,
             UnitPrice = lineItem.UnitPrice,
             Total = lineItem.Total

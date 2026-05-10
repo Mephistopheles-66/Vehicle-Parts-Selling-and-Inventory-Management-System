@@ -23,8 +23,22 @@ public interface IApplicationDbContext : IScopedService
     DbSet<PurchaseInvoiceLineItem> PurchaseInvoiceLineItems { get; set; }
     #endregion
 
-    #region Customer Features
+    #region Vehicle, Service & Sales
     DbSet<Vehicle> Vehicles { get; set; }
+
+    DbSet<SalesInvoice> SalesInvoices { get; set; }
+
+    DbSet<SalesInvoiceItem> SalesInvoiceItems { get; set; }
+
+    DbSet<ServiceAppointment> ServiceAppointments { get; set; }
+
+    DbSet<ServiceReview> ServiceReviews { get; set; }
+
+    DbSet<UnavailablePartRequest> UnavailablePartRequests { get; set; }
+
+    DbSet<ServiceRecord> ServiceRecords { get; set; }
+
+    DbSet<PartFailurePrediction> PartFailurePredictions { get; set; }
 
     DbSet<Appointment> Appointments { get; set; }
 
@@ -35,6 +49,8 @@ public interface IApplicationDbContext : IScopedService
 
     #region Modules
     DbSet<EmailOutbox> EmailOutboxes { get; set; }
+
+    DbSet<AdminNotification> AdminNotifications { get; set; }
     #endregion
 
     #region Functions

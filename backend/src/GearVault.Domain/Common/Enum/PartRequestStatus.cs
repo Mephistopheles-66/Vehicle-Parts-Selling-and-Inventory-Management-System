@@ -4,6 +4,9 @@ public enum PartRequestStatus
 {
     Pending,
     Reviewed,
+    Sourcing,
     Available,
-    Rejected
+    Fulfilled,
+    Rejected,
+    Cancelled
 }

@@ -8,7 +8,7 @@ public class AppointmentDto
     public DateTime ScheduledAt { get; set; }
     public string? Notes { get; set; }
     public string Status { get; set; } = string.Empty;
-    public string VehiclePlateNumber { get; set; } = string.Empty;
+    public string VehicleNumber { get; set; } = string.Empty;
     public string VehicleMake { get; set; } = string.Empty;
     public string VehicleModel { get; set; } = string.Empty;
     public bool IsActive { get; set; }

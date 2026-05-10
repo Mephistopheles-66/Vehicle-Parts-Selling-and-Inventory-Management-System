@@ -5,21 +5,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GearVault.Domain.Entities;
 
 public class Vehicle(
-    Guid ownerUserId,
-    string plateNumber,
+    Guid userId,
+    string vehicleNumber,
+    string licenseNumber,
     string make,
     string model,
     int year,
-    string? vin,
-    int mileage,
-    FuelType fuelType,
-    DateTime registrationDate
-) : BaseEntity<Guid>
+    FuelType fuelType
+) : AuditableEntity<Guid>
 {
-    [ForeignKey(nameof(Owner))]
-    public Guid OwnerUserId { get; private set; } = ownerUserId;
+    [ForeignKey(nameof(User))]
+    public Guid UserId { get; private set; } = userId;
 
-    public string PlateNumber { get; private set; } = plateNumber;
+    public string VehicleNumber { get; private set; } = vehicleNumber;
+
+    public string LicenseNumber { get; private set; } = licenseNumber;
 
     public string Make { get; private set; } = make;
 
@@ -27,40 +27,29 @@ public class Vehicle(
 
     public int Year { get; private set; } = year;
 
-    public string? Vin { get; private set; } = vin;
-
-    public int Mileage { get; private set; } = mileage;
-
     public FuelType FuelType { get; private set; } = fuelType;
 
-    public DateTime RegistrationDate { get; private set; } = registrationDate;
+    public virtual User? User { get; set; }
 
-    public DateTime UpdatedAt { get; private set; } = DateTime.Now;
+    public virtual ICollection<SalesInvoice>? SalesInvoices { get; set; }
 
-    public virtual User? Owner { get; set; }
+    public virtual ICollection<ServiceAppointment>? ServiceAppointments { get; set; }
 
-    public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+    public virtual ICollection<UnavailablePartRequest>? UnavailablePartRequests { get; set; }
 
-    public void Update(
-        string plateNumber,
-        string make,
-        string model,
-        int year,
-        string? vin,
-        int mileage,
-        FuelType fuelType,
-        DateTime registrationDate,
-        bool isActive)
+    public virtual ICollection<ServiceRecord>? ServiceRecords { get; set; }
+
+    public virtual ICollection<PartFailurePrediction>? PartFailurePredictions { get; set; }
+
+    public virtual ICollection<Appointment>? Appointments { get; set; }
+
+    public void Update(string vehicleNumber, string licenseNumber, string make, string model, int year, FuelType fuelType)
     {
-        PlateNumber = plateNumber;
-        Make = make;
-        Model = model;
-        Year = year;
-        Vin = vin;
-        Mileage = mileage;
-        FuelType = fuelType;
-        RegistrationDate = registrationDate;
-        IsActive = isActive;
-        UpdatedAt = DateTime.Now;
+        if (VehicleNumber != vehicleNumber) VehicleNumber = vehicleNumber;
+        if (LicenseNumber != licenseNumber) LicenseNumber = licenseNumber;
+        if (Make != make) Make = make;
+        if (Model != model) Model = model;
+        if (Year != year) Year = year;
+        if (FuelType != fuelType) FuelType = fuelType;
     }
 }

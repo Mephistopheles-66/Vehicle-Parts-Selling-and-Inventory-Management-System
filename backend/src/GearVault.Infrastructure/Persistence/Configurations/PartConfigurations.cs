@@ -31,10 +31,6 @@ public sealed class PartConfigurations : IEntityTypeConfiguration<Part>
             .IsRequired();
 
         builder
-            .Property(x => x.CostPrice)
-            .HasPrecision(18, 2);
-
-        builder
             .Property(x => x.SellingPrice)
             .HasPrecision(18, 2);
 

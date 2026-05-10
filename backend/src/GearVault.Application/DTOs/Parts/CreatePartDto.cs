@@ -8,7 +8,6 @@ public class CreatePartDto
     public string? Category { get; set; }
     public string Unit { get; set; } = "PIECE";
     public int ReorderLevel { get; set; }
-    public decimal CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
     public bool IsActive { get; set; } = true;
 }

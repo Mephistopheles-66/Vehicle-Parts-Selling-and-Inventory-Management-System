@@ -45,7 +45,7 @@ public class EmailDto
     #endregion
 
     #region Appointment Fields
-    public string? VehiclePlateNumber { get; set; }
+    public string? VehicleNumber { get; set; }
 
     public string? VehicleMake { get; set; }
 
