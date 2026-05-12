@@ -66,7 +66,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/403" element={<Forbidden />} />
 
-            <Route element={<AppLayout allow={['admin']} />}>
+            <Route element={<AppLayout allow={['super-admin']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/parts" element={<PartsList />} />
               <Route path="/admin/parts/new" element={<PartForm />} />
@@ -88,7 +88,7 @@ const App = () => (
               <Route path="/admin/overdue-credits" element={<OverdueCredits />} />
             </Route>
 
-            <Route element={<AppLayout allow={['staff', 'admin']} />}>
+            <Route element={<AppLayout allow={['staff', 'super-admin']} />}>
               <Route path="/staff" element={<StaffDashboard />} />
               <Route path="/staff/customers" element={<CustomersList />} />
               <Route path="/staff/customers/new" element={<CustomerForm />} />
@@ -118,7 +118,7 @@ const App = () => (
               <Route path="/customer/reviews" element={<Reviews />} />
             </Route>
 
-            <Route element={<AppLayout allow={['admin','staff','customer']} />}>
+            <Route element={<AppLayout allow={['super-admin','staff','customer']} />}>
               <Route path="/settings" element={<Settings />} />
             </Route>
 

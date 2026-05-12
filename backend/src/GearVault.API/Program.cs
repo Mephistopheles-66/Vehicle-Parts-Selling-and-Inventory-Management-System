@@ -3,6 +3,7 @@ using GearVault.API.Middleware;
 using System.IdentityModel.Tokens.Jwt;
 using GearVault.Infrastructure.Dependency;
 using GearVault.API.Configurations.Application;
+using GearVault.Domain.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,8 @@ app.AddCustomSwaggerInterface();
 app.AddCustomScalarInterface();
 
 app.UseRouting();
+
+app.UseCors(Constants.Cors.MyAllowSpecificOrigins);
 
 app.UseStaticFiles(new StaticFileOptions
 {

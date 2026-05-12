@@ -1,48 +1,66 @@
+import { Link, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Edit, Mail, MapPin, Phone } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useParams, Link } from 'react-router-dom';
-import { vendors, purchaseInvoices } from '@/data/mock';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { formatRs } from '@/lib/format';
+import { VendorsService } from '@/api/generated/client';
+import { getApiErrorMessage, unwrapApiResult } from '@/api/client';
 
 const VendorDetails = () => {
   const { id } = useParams();
-  const v = vendors.find(x => x.id === id) ?? vendors[0];
-  const orders = purchaseInvoices.filter(p => p.vendorId === v.id);
+  const { data: vendor, isLoading, error } = useQuery({
+    queryKey: ['vendors', id],
+    queryFn: async () => unwrapApiResult(await VendorsService.getVendorById({ vendorId: id! }), null),
+    enabled: Boolean(id),
+  });
+
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader title="Vendor details" description="Loading supplier profile..." />
+        <div className="p-6 lg:p-8 text-sm text-muted-foreground">Loading vendor...</div>
+      </div>
+    );
+  }
+
+  if (error || !vendor) {
+    return (
+      <div>
+        <PageHeader title="Vendor not found" description="Unable to load this supplier." />
+        <div className="p-6 lg:p-8 text-sm text-destructive">{getApiErrorMessage(error, 'Unable to load vendor')}</div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <PageHeader title={v.name} description={v.address}
-        actions={<Button asChild><Link to={`/admin/vendors/${v.id}/edit`}><Edit className="h-4 w-4 mr-2" />Edit</Link></Button>} />
-      <div className="p-6 lg:p-8 grid lg:grid-cols-3 gap-5">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Profile</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div><div className="text-muted-foreground text-xs">Contact</div><div className="font-medium">{v.contact}</div></div>
-            <div><div className="text-muted-foreground text-xs">Email</div><div>{v.email}</div></div>
-            <div><div className="text-muted-foreground text-xs">Phone</div><div className="font-mono">{v.phone}</div></div>
-            <div><div className="text-muted-foreground text-xs">Total purchases</div><div className="tabular font-bold text-base">{formatRs(v.totalPurchases)}</div></div>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">Purchase history</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-canvas border-y"><tr>{['PO #','Date','Items','Total','Status'].map(h => <th key={h} className="text-left px-4 py-2.5 text-xs uppercase tracking-wider text-muted-foreground">{h}</th>)}</tr></thead>
-              <tbody>{orders.map(o => (
-                <tr key={o.id} className="border-b">
-                  <td className="px-4 py-3 font-mono text-xs">{o.id}</td>
-                  <td className="px-4 py-3">{o.date}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{o.items.length}</td>
-                  <td className="px-4 py-3 tabular font-medium">{formatRs(o.total)}</td>
-                  <td className="px-4 py-3"><StatusBadge variant={o.status === 'paid' ? 'success' : 'warning'}>{o.status}</StatusBadge></td>
-                </tr>))}</tbody>
-            </table>
-          </CardContent>
-        </Card>
+      <PageHeader title={vendor.name ?? 'Vendor'} description={vendor.address ?? 'Supplier profile'}
+        actions={<Button asChild><Link to={`/admin/vendors/${vendor.id}/edit`}><Edit className="h-4 w-4 mr-2" />Edit</Link></Button>} />
+      <div className="p-6 lg:p-8">
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> Email</div>
+              <div className="mt-2 font-medium break-all">{vendor.contactEmail ?? '-'}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-4 w-4" /> Phone</div>
+              <div className="mt-2 font-mono">{vendor.phone ?? '-'}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" /> Address</div>
+              <div className="mt-2 font-medium">{vendor.address ?? '-'}</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
 };
+
 export default VendorDetails;

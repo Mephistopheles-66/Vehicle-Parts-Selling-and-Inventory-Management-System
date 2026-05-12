@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { Package, Users, FileText, Calendar, LayoutDashboard } from 'lucide-react';
 import { parts, customers, salesInvoices } from '@/data/mock';
 import { useAuth } from '@/hooks/use-auth';
+import { getRoleHomePath } from '@/lib/roles';
 
 export const CommandPalette = ({ open, onOpenChange }: { open: boolean; onOpenChange: (b: boolean) => void }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const role = user?.role ?? 'admin';
+  const homePath = user ? getRoleHomePath(user.role) : '/admin';
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -29,7 +30,7 @@ export const CommandPalette = ({ open, onOpenChange }: { open: boolean; onOpenCh
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          <CommandItem onSelect={() => go(`/${role}`)}><LayoutDashboard className="h-4 w-4 mr-2" />Dashboard</CommandItem>
+          <CommandItem onSelect={() => go(homePath)}><LayoutDashboard className="h-4 w-4 mr-2" />Dashboard</CommandItem>
           <CommandItem onSelect={() => go('/admin/parts')}><Package className="h-4 w-4 mr-2" />Parts</CommandItem>
           <CommandItem onSelect={() => go('/staff/customers')}><Users className="h-4 w-4 mr-2" />Customers</CommandItem>
           <CommandItem onSelect={() => go('/staff/invoices')}><FileText className="h-4 w-4 mr-2" />Invoices</CommandItem>

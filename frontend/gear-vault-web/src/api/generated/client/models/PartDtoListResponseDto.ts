@@ -1,0 +1,11 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { PartDto } from './PartDto';
+export type PartDtoListResponseDto = {
+    statusCode?: number;
+    message?: string | null;
+    result?: Array<PartDto> | null;
+};
+
