@@ -2,6 +2,7 @@ using System.Net;
 using Gridforce.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using GearVault.API.Attributes;
+using GearVault.Application.Common.Response;
 using GearVault.Application.DTOs.Reviews;
 using GearVault.Application.Interfaces.Services;
 
@@ -14,41 +15,56 @@ public class ReviewsController(IReviewService reviewService) : ControllerBase
 {
     [HttpGet]
     [Documentation("GetMyReviews", "Retrieve all reviews submitted by the current user.")]
-    public ActionResult<List<ReviewDto>> GetMyReviews()
+    public ResponseDto<List<ReviewDto>> GetMyReviews()
     {
         var result = reviewService.GetMyReviews();
-        return Ok(result);
+        return new ResponseDto<List<ReviewDto>>(
+            (int)HttpStatusCode.OK,
+            "Reviews retrieved successfully.",
+            result);
     }
 
     [HttpGet("{reviewId:guid}")]
     [Documentation("GetReviewById", "Retrieve a review by identifier.")]
-    public ActionResult<ReviewDto> GetReviewById([FromRoute] Guid reviewId)
+    public ResponseDto<ReviewDto> GetReviewById([FromRoute] Guid reviewId)
     {
         var result = reviewService.GetReviewById(reviewId);
-        return Ok(result);
+        return new ResponseDto<ReviewDto>(
+            (int)HttpStatusCode.OK,
+            "Review retrieved successfully.",
+            result);
     }
 
     [HttpPost]
     [Documentation("CreateReview", "Submit a review for a completed appointment.")]
-    public ActionResult<ReviewDto> CreateReview([FromBody] CreateReviewDto dto)
+    public ResponseDto<ReviewDto> CreateReview([FromBody] CreateReviewDto dto)
     {
         var result = reviewService.CreateReview(dto);
-        return StatusCode((int)HttpStatusCode.Created, result);
+        return new ResponseDto<ReviewDto>(
+            (int)HttpStatusCode.Created,
+            "Review created successfully.",
+            result);
     }
 
     [HttpPut("{reviewId:guid}")]
     [Documentation("UpdateReview", "Update an existing review.")]
-    public ActionResult<ReviewDto> UpdateReview([FromRoute] Guid reviewId, [FromBody] UpdateReviewDto dto)
+    public ResponseDto<ReviewDto> UpdateReview([FromRoute] Guid reviewId, [FromBody] UpdateReviewDto dto)
     {
         var result = reviewService.UpdateReview(reviewId, dto);
-        return Ok(result);
+        return new ResponseDto<ReviewDto>(
+            (int)HttpStatusCode.OK,
+            "Review updated successfully.",
+            result);
     }
 
     [HttpDelete("{reviewId:guid}")]
     [Documentation("DeleteReview", "Delete a review.")]
-    public ActionResult DeleteReview([FromRoute] Guid reviewId)
+    public ResponseDto<bool> DeleteReview([FromRoute] Guid reviewId)
     {
         reviewService.DeleteReview(reviewId);
-        return NoContent();
+        return new ResponseDto<bool>(
+            (int)HttpStatusCode.OK,
+            "Review deleted successfully.",
+            true);
     }
 }

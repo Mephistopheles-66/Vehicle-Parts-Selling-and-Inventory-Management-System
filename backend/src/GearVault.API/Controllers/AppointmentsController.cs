@@ -2,6 +2,7 @@ using System.Net;
 using Gridforce.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using GearVault.API.Attributes;
+using GearVault.Application.Common.Response;
 using GearVault.Application.DTOs.Appointments;
 using GearVault.Application.Interfaces.Services;
 
@@ -14,41 +15,56 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
 {
     [HttpGet]
     [Documentation("GetMyAppointments", "Retrieve all appointments for the current user.")]
-    public ActionResult<List<AppointmentDto>> GetMyAppointments()
+    public ResponseDto<List<AppointmentDto>> GetMyAppointments()
     {
         var result = appointmentService.GetMyAppointments();
-        return Ok(result);
+        return new ResponseDto<List<AppointmentDto>>(
+            (int)HttpStatusCode.OK,
+            "Appointments retrieved successfully.",
+            result);
     }
 
     [HttpGet("{appointmentId:guid}")]
     [Documentation("GetAppointmentById", "Retrieve an appointment by identifier.")]
-    public ActionResult<AppointmentDto> GetAppointmentById([FromRoute] Guid appointmentId)
+    public ResponseDto<AppointmentDto> GetAppointmentById([FromRoute] Guid appointmentId)
     {
         var result = appointmentService.GetAppointmentById(appointmentId);
-        return Ok(result);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.OK,
+            "Appointment retrieved successfully.",
+            result);
     }
 
     [HttpPost]
     [Documentation("CreateAppointment", "Create a new appointment for a vehicle owned by the current user.")]
-    public ActionResult<AppointmentDto> CreateAppointment([FromBody] CreateAppointmentDto dto)
+    public ResponseDto<AppointmentDto> CreateAppointment([FromBody] CreateAppointmentDto dto)
     {
         var result = appointmentService.CreateAppointment(dto);
-        return StatusCode((int)HttpStatusCode.Created, result);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.Created,
+            "Appointment created successfully.",
+            result);
     }
 
     [HttpPut("{appointmentId:guid}/reschedule")]
     [Documentation("RescheduleAppointment", "Reschedule a pending appointment.")]
-    public ActionResult<AppointmentDto> RescheduleAppointment([FromRoute] Guid appointmentId, [FromBody] RescheduleAppointmentDto dto)
+    public ResponseDto<AppointmentDto> RescheduleAppointment([FromRoute] Guid appointmentId, [FromBody] RescheduleAppointmentDto dto)
     {
         var result = appointmentService.RescheduleAppointment(appointmentId, dto);
-        return Ok(result);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.OK,
+            "Appointment rescheduled successfully.",
+            result);
     }
 
     [HttpPut("{appointmentId:guid}/cancel")]
     [Documentation("CancelAppointment", "Cancel a pending appointment.")]
-    public ActionResult<AppointmentDto> CancelAppointment([FromRoute] Guid appointmentId)
+    public ResponseDto<AppointmentDto> CancelAppointment([FromRoute] Guid appointmentId)
     {
         var result = appointmentService.CancelAppointment(appointmentId);
-        return Ok(result);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.OK,
+            "Appointment cancelled successfully.",
+            result);
     }
 }

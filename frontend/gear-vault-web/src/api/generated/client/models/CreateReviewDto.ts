@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type FuelType = 'Petrol' | 'Diesel' | 'Gas' | 'Electric' | 'Hybrid' | 'CNG' | 'LPG';
+export type CreateReviewDto = {
+    appointmentId?: string;
+    rating?: number;
+    comment?: string | null;
+};
+

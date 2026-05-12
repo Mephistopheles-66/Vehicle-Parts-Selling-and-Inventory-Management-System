@@ -2,4 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type FuelType = 'Petrol' | 'Diesel' | 'Gas' | 'Electric' | 'Hybrid' | 'CNG' | 'LPG';
+export type CreatePartRequestDto = {
+    partName?: string | null;
+    description?: string | null;
+};
+

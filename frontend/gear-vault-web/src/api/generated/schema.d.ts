@@ -5,6 +5,39 @@
 
 
 export type paths = {
+  "/api/appointments": {
+    /**
+     * GetMyAppointments
+     * @description Retrieve all appointments for the current user.
+     */
+    get: operations["GetMyAppointments"];
+    /**
+     * CreateAppointment
+     * @description Create a new appointment for a vehicle owned by the current user.
+     */
+    post: operations["CreateAppointment"];
+  };
+  "/api/appointments/{appointmentId}": {
+    /**
+     * GetAppointmentById
+     * @description Retrieve an appointment by identifier.
+     */
+    get: operations["GetAppointmentById"];
+  };
+  "/api/appointments/{appointmentId}/reschedule": {
+    /**
+     * RescheduleAppointment
+     * @description Reschedule a pending appointment.
+     */
+    put: operations["RescheduleAppointment"];
+  };
+  "/api/appointments/{appointmentId}/cancel": {
+    /**
+     * CancelAppointment
+     * @description Cancel a pending appointment.
+     */
+    put: operations["CancelAppointment"];
+  };
   "/api/v1/authentication/login": {
     /**
      * Login
@@ -46,6 +79,35 @@ export type paths = {
      * @description Logout the currently logged in user.
      */
     post: operations["Logout"];
+  };
+  "/api/part-requests": {
+    /**
+     * GetMyPartRequests
+     * @description Retrieve all part requests submitted by the current user.
+     */
+    get: operations["GetMyPartRequests"];
+    /**
+     * CreatePartRequest
+     * @description Submit a new part request.
+     */
+    post: operations["CreatePartRequest"];
+  };
+  "/api/part-requests/{partRequestId}": {
+    /**
+     * GetPartRequestById
+     * @description Retrieve a part request by identifier.
+     */
+    get: operations["GetPartRequestById"];
+    /**
+     * UpdatePartRequest
+     * @description Update an existing part request.
+     */
+    put: operations["UpdatePartRequest"];
+    /**
+     * DeletePartRequest
+     * @description Delete a part request.
+     */
+    delete: operations["DeletePartRequest"];
   };
   "/api/parts": {
     /**
@@ -147,6 +209,35 @@ export type paths = {
      */
     put: operations["CancelPurchaseInvoice"];
   };
+  "/api/reviews": {
+    /**
+     * GetMyReviews
+     * @description Retrieve all reviews submitted by the current user.
+     */
+    get: operations["GetMyReviews"];
+    /**
+     * CreateReview
+     * @description Submit a review for a completed appointment.
+     */
+    post: operations["CreateReview"];
+  };
+  "/api/reviews/{reviewId}": {
+    /**
+     * GetReviewById
+     * @description Retrieve a review by identifier.
+     */
+    get: operations["GetReviewById"];
+    /**
+     * UpdateReview
+     * @description Update an existing review.
+     */
+    put: operations["UpdateReview"];
+    /**
+     * DeleteReview
+     * @description Delete a review.
+     */
+    delete: operations["DeleteReview"];
+  };
   "/api/v1/role": {
     /**
      * GetAllRoles
@@ -246,6 +337,35 @@ export type paths = {
      */
     patch: operations["ActivateDeactivateUser"];
   };
+  "/api/vehicles": {
+    /**
+     * GetMyVehicles
+     * @description Retrieve all vehicles belonging to the logged in customer.
+     */
+    get: operations["GetMyVehicles"];
+    /**
+     * CreateVehicle
+     * @description Register a new vehicle for the logged in customer.
+     */
+    post: operations["CreateVehicle"];
+  };
+  "/api/vehicles/{vehicleId}": {
+    /**
+     * GetVehicleById
+     * @description Retrieve a vehicle by identifier.
+     */
+    get: operations["GetVehicleById"];
+    /**
+     * UpdateVehicle
+     * @description Update an existing vehicle.
+     */
+    put: operations["UpdateVehicle"];
+    /**
+     * DeleteVehicle
+     * @description Delete a vehicle.
+     */
+    delete: operations["DeleteVehicle"];
+  };
   "/api/vendors": {
     /**
      * GetAllVendors
@@ -288,6 +408,38 @@ export type components = {
       emailAddressOrUsername?: string | null;
       verificationCode?: string | null;
     };
+    AppointmentDto: {
+      /** Format: uuid */
+      id?: string;
+      /** Format: uuid */
+      vehicleId?: string;
+      /** Format: uuid */
+      customerUserId?: string;
+      /** Format: date-time */
+      scheduledAt?: string;
+      notes?: string | null;
+      status?: string | null;
+      vehicleNumber?: string | null;
+      vehicleMake?: string | null;
+      vehicleModel?: string | null;
+      isActive?: boolean;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    AppointmentDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["AppointmentDto"][] | null;
+    };
+    AppointmentDtoResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["AppointmentDto"];
+    };
     AssetDto: {
       fileUrl?: string | null;
       originalFileName?: string | null;
@@ -306,6 +458,13 @@ export type components = {
       newPassword?: string | null;
       confirmPassword?: string | null;
     };
+    CreateAppointmentDto: {
+      /** Format: uuid */
+      vehicleId?: string;
+      /** Format: date-time */
+      scheduledAt?: string;
+      notes?: string | null;
+    };
     CreatePartDto: {
       partNumber?: string | null;
       name?: string | null;
@@ -317,6 +476,10 @@ export type components = {
       /** Format: double */
       sellingPrice?: number;
       isActive?: boolean;
+    };
+    CreatePartRequestDto: {
+      partName?: string | null;
+      description?: string | null;
     };
     CreatePurchaseInvoiceDto: {
       /** Format: uuid */
@@ -342,6 +505,13 @@ export type components = {
       /** Format: double */
       unitPrice?: number;
     };
+    CreateReviewDto: {
+      /** Format: uuid */
+      appointmentId?: string;
+      /** Format: int32 */
+      rating?: number;
+      comment?: string | null;
+    };
     CreateSalesInvoiceDto: {
       /** Format: uuid */
       vehicleId?: string;
@@ -356,6 +526,17 @@ export type components = {
       /** Format: int32 */
       quantity?: number;
     };
+    CreateVehicleDto: {
+      /** Format: uuid */
+      userId?: string;
+      vehicleNumber?: string | null;
+      licenseNumber?: string | null;
+      make?: string | null;
+      model?: string | null;
+      /** Format: int32 */
+      year?: number;
+      fuelType?: components["schemas"]["FuelType"];
+    };
     CreateVendorDto: {
       name?: string | null;
       contactEmail?: string | null;
@@ -364,7 +545,7 @@ export type components = {
       isActive?: boolean;
     };
     /** @enum {string} */
-    FuelType: "Diesel" | "Gas" | "Electric";
+    FuelType: "Petrol" | "Diesel" | "Gas" | "Electric" | "Hybrid" | "CNG" | "LPG";
     GuidResponseDto: {
       /** Format: int32 */
       statusCode?: number;
@@ -418,6 +599,32 @@ export type components = {
       statusCode?: number;
       message?: string | null;
       result?: components["schemas"]["PartDto"];
+    };
+    PartRequestDto: {
+      /** Format: uuid */
+      id?: string;
+      /** Format: uuid */
+      customerUserId?: string;
+      partName?: string | null;
+      description?: string | null;
+      status?: string | null;
+      isActive?: boolean;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    PartRequestDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["PartRequestDto"][] | null;
+    };
+    PartRequestDtoResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["PartRequestDto"];
     };
     /** @enum {string} */
     PaymentStatus: "Paid" | "Unpaid" | "PartiallyPaid" | "Overdue";
@@ -490,6 +697,39 @@ export type components = {
       unitPrice?: number;
       /** Format: double */
       total?: number;
+    };
+    RescheduleAppointmentDto: {
+      /** Format: date-time */
+      scheduledAt?: string;
+      notes?: string | null;
+    };
+    ReviewDto: {
+      /** Format: uuid */
+      id?: string;
+      /** Format: uuid */
+      appointmentId?: string;
+      /** Format: uuid */
+      customerUserId?: string;
+      /** Format: int32 */
+      rating?: number;
+      comment?: string | null;
+      isActive?: boolean;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    ReviewDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["ReviewDto"][] | null;
+    };
+    ReviewDtoResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["ReviewDto"];
     };
     RoleDto: {
       /** Format: uuid */
@@ -610,12 +850,31 @@ export type components = {
       sellingPrice?: number | null;
       isActive?: boolean | null;
     };
+    UpdatePartRequestDto: {
+      partName?: string | null;
+      description?: string | null;
+      isActive?: boolean | null;
+    };
     UpdateProfileDto: {
       name?: string | null;
       emailAddress?: string | null;
       username?: string | null;
       phoneNumber?: string | null;
       address?: string | null;
+    };
+    UpdateReviewDto: {
+      /** Format: int32 */
+      rating?: number | null;
+      comment?: string | null;
+    };
+    UpdateVehicleDto: {
+      vehicleNumber?: string | null;
+      licenseNumber?: string | null;
+      make?: string | null;
+      model?: string | null;
+      /** Format: int32 */
+      year?: number | null;
+      fuelType?: components["schemas"]["FuelType"];
     };
     UpdateVendorDto: {
       name?: string | null;
@@ -678,6 +937,18 @@ export type components = {
       year?: number;
       fuelType?: components["schemas"]["FuelType"];
     };
+    VehicleDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["VehicleDto"][] | null;
+    };
+    VehicleDtoResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["VehicleDto"];
+    };
     VendorDto: {
       /** Format: uuid */
       id?: string;
@@ -717,6 +988,115 @@ export type external = Record<string, never>;
 
 export type operations = {
 
+  /**
+   * GetMyAppointments
+   * @description Retrieve all appointments for the current user.
+   */
+  GetMyAppointments: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AppointmentDtoListResponseDto"];
+          "application/json": components["schemas"]["AppointmentDtoListResponseDto"];
+          "text/json": components["schemas"]["AppointmentDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * CreateAppointment
+   * @description Create a new appointment for a vehicle owned by the current user.
+   */
+  CreateAppointment: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CreateAppointmentDto"];
+        "text/json": components["schemas"]["CreateAppointmentDto"];
+        "application/*+json": components["schemas"]["CreateAppointmentDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AppointmentDtoResponseDto"];
+          "application/json": components["schemas"]["AppointmentDtoResponseDto"];
+          "text/json": components["schemas"]["AppointmentDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetAppointmentById
+   * @description Retrieve an appointment by identifier.
+   */
+  GetAppointmentById: {
+    parameters: {
+      path: {
+        appointmentId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AppointmentDtoResponseDto"];
+          "application/json": components["schemas"]["AppointmentDtoResponseDto"];
+          "text/json": components["schemas"]["AppointmentDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * RescheduleAppointment
+   * @description Reschedule a pending appointment.
+   */
+  RescheduleAppointment: {
+    parameters: {
+      path: {
+        appointmentId: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RescheduleAppointmentDto"];
+        "text/json": components["schemas"]["RescheduleAppointmentDto"];
+        "application/*+json": components["schemas"]["RescheduleAppointmentDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AppointmentDtoResponseDto"];
+          "application/json": components["schemas"]["AppointmentDtoResponseDto"];
+          "text/json": components["schemas"]["AppointmentDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * CancelAppointment
+   * @description Cancel a pending appointment.
+   */
+  CancelAppointment: {
+    parameters: {
+      path: {
+        appointmentId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AppointmentDtoResponseDto"];
+          "application/json": components["schemas"]["AppointmentDtoResponseDto"];
+          "text/json": components["schemas"]["AppointmentDtoResponseDto"];
+        };
+      };
+    };
+  };
   /**
    * Login
    * @description Login user and return access token details.
@@ -844,6 +1224,115 @@ export type operations = {
    * @description Logout the currently logged in user.
    */
   Logout: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["BooleanResponseDto"];
+          "application/json": components["schemas"]["BooleanResponseDto"];
+          "text/json": components["schemas"]["BooleanResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetMyPartRequests
+   * @description Retrieve all part requests submitted by the current user.
+   */
+  GetMyPartRequests: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["PartRequestDtoListResponseDto"];
+          "application/json": components["schemas"]["PartRequestDtoListResponseDto"];
+          "text/json": components["schemas"]["PartRequestDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * CreatePartRequest
+   * @description Submit a new part request.
+   */
+  CreatePartRequest: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CreatePartRequestDto"];
+        "text/json": components["schemas"]["CreatePartRequestDto"];
+        "application/*+json": components["schemas"]["CreatePartRequestDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["PartRequestDtoResponseDto"];
+          "application/json": components["schemas"]["PartRequestDtoResponseDto"];
+          "text/json": components["schemas"]["PartRequestDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetPartRequestById
+   * @description Retrieve a part request by identifier.
+   */
+  GetPartRequestById: {
+    parameters: {
+      path: {
+        partRequestId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["PartRequestDtoResponseDto"];
+          "application/json": components["schemas"]["PartRequestDtoResponseDto"];
+          "text/json": components["schemas"]["PartRequestDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * UpdatePartRequest
+   * @description Update an existing part request.
+   */
+  UpdatePartRequest: {
+    parameters: {
+      path: {
+        partRequestId: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdatePartRequestDto"];
+        "text/json": components["schemas"]["UpdatePartRequestDto"];
+        "application/*+json": components["schemas"]["UpdatePartRequestDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["PartRequestDtoResponseDto"];
+          "application/json": components["schemas"]["PartRequestDtoResponseDto"];
+          "text/json": components["schemas"]["PartRequestDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * DeletePartRequest
+   * @description Delete a part request.
+   */
+  DeletePartRequest: {
+    parameters: {
+      path: {
+        partRequestId: string;
+      };
+    };
     responses: {
       /** @description OK */
       200: {
@@ -1180,6 +1669,115 @@ export type operations = {
           "text/plain": components["schemas"]["PurchaseInvoiceDtoResponseDto"];
           "application/json": components["schemas"]["PurchaseInvoiceDtoResponseDto"];
           "text/json": components["schemas"]["PurchaseInvoiceDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetMyReviews
+   * @description Retrieve all reviews submitted by the current user.
+   */
+  GetMyReviews: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["ReviewDtoListResponseDto"];
+          "application/json": components["schemas"]["ReviewDtoListResponseDto"];
+          "text/json": components["schemas"]["ReviewDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * CreateReview
+   * @description Submit a review for a completed appointment.
+   */
+  CreateReview: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CreateReviewDto"];
+        "text/json": components["schemas"]["CreateReviewDto"];
+        "application/*+json": components["schemas"]["CreateReviewDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["ReviewDtoResponseDto"];
+          "application/json": components["schemas"]["ReviewDtoResponseDto"];
+          "text/json": components["schemas"]["ReviewDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetReviewById
+   * @description Retrieve a review by identifier.
+   */
+  GetReviewById: {
+    parameters: {
+      path: {
+        reviewId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["ReviewDtoResponseDto"];
+          "application/json": components["schemas"]["ReviewDtoResponseDto"];
+          "text/json": components["schemas"]["ReviewDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * UpdateReview
+   * @description Update an existing review.
+   */
+  UpdateReview: {
+    parameters: {
+      path: {
+        reviewId: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdateReviewDto"];
+        "text/json": components["schemas"]["UpdateReviewDto"];
+        "application/*+json": components["schemas"]["UpdateReviewDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["ReviewDtoResponseDto"];
+          "application/json": components["schemas"]["ReviewDtoResponseDto"];
+          "text/json": components["schemas"]["ReviewDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * DeleteReview
+   * @description Delete a review.
+   */
+  DeleteReview: {
+    parameters: {
+      path: {
+        reviewId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["BooleanResponseDto"];
+          "application/json": components["schemas"]["BooleanResponseDto"];
+          "text/json": components["schemas"]["BooleanResponseDto"];
         };
       };
     };
@@ -1559,6 +2157,115 @@ export type operations = {
     parameters: {
       path: {
         userId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["BooleanResponseDto"];
+          "application/json": components["schemas"]["BooleanResponseDto"];
+          "text/json": components["schemas"]["BooleanResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetMyVehicles
+   * @description Retrieve all vehicles belonging to the logged in customer.
+   */
+  GetMyVehicles: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["VehicleDtoListResponseDto"];
+          "application/json": components["schemas"]["VehicleDtoListResponseDto"];
+          "text/json": components["schemas"]["VehicleDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * CreateVehicle
+   * @description Register a new vehicle for the logged in customer.
+   */
+  CreateVehicle: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["CreateVehicleDto"];
+        "text/json": components["schemas"]["CreateVehicleDto"];
+        "application/*+json": components["schemas"]["CreateVehicleDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["VehicleDtoResponseDto"];
+          "application/json": components["schemas"]["VehicleDtoResponseDto"];
+          "text/json": components["schemas"]["VehicleDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetVehicleById
+   * @description Retrieve a vehicle by identifier.
+   */
+  GetVehicleById: {
+    parameters: {
+      path: {
+        vehicleId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["VehicleDtoResponseDto"];
+          "application/json": components["schemas"]["VehicleDtoResponseDto"];
+          "text/json": components["schemas"]["VehicleDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * UpdateVehicle
+   * @description Update an existing vehicle.
+   */
+  UpdateVehicle: {
+    parameters: {
+      path: {
+        vehicleId: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["UpdateVehicleDto"];
+        "text/json": components["schemas"]["UpdateVehicleDto"];
+        "application/*+json": components["schemas"]["UpdateVehicleDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["VehicleDtoResponseDto"];
+          "application/json": components["schemas"]["VehicleDtoResponseDto"];
+          "text/json": components["schemas"]["VehicleDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * DeleteVehicle
+   * @description Delete a vehicle.
+   */
+  DeleteVehicle: {
+    parameters: {
+      path: {
+        vehicleId: string;
       };
     };
     responses: {
