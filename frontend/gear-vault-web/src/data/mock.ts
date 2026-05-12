@@ -1,7 +1,7 @@
 import type { Part, Vendor, Customer, SalesInvoice, PurchaseInvoice, Appointment, PartRequest, Prediction, User } from '@/types';
 
 export const users: User[] = [
-  { id: 'u1', name: 'Aarav Sharma', email: 'admin@gearvault.com', role: 'admin', phone: '+977 9801000001' },
+  { id: 'u1', name: 'Aarav Sharma', email: 'superadmin@gearvault.com', role: 'super-admin', phone: '+977 9801000001' },
   { id: 'u2', name: 'Priya Thapa', email: 'staff@gearvault.com', role: 'staff', phone: '+977 9801000002' },
   { id: 'u3', name: 'Rohan Bista', email: 'customer@gearvault.com', role: 'customer', phone: '+977 9801000003' },
   { id: 'u4', name: 'Mina Gurung', email: 'mina@gearvault.com', role: 'staff', phone: '+977 9801000004' },

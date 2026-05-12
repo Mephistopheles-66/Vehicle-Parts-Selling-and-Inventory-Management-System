@@ -4,10 +4,11 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { getRoleLabel } from '@/lib/roles';
 
 export const Topbar = ({ onSearchOpen }: { onSearchOpen?: () => void }) => {
   const { user, logout } = useAuth();
@@ -30,7 +31,7 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen?: () => void }) => {
         <span>Search parts, customers, invoices…</span>
         <kbd className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-background">⌘K</kbd>
       </button>
-      <div className="flex-1 md:hidden" />
+      <div className="flex-1" />
       <Button variant="ghost" size="icon" onClick={() => setDark(d => !d)} aria-label="Toggle theme">
         {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </Button>
@@ -42,11 +43,12 @@ export const Topbar = ({ onSearchOpen }: { onSearchOpen?: () => void }) => {
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2.5 h-10 pl-1 pr-3 rounded-md hover:bg-secondary transition-colors">
             <Avatar className="h-8 w-8">
+              <AvatarImage src={user?.avatar ?? undefined} alt={user?.name ?? 'Profile'} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div className="hidden sm:flex flex-col items-start leading-tight">
               <span className="text-sm font-medium text-charcoal">{user?.name}</span>
-              <span className="text-[11px] text-muted-foreground capitalize">{user?.role}</span>
+              <span className="text-[11px] text-muted-foreground capitalize">{user ? getRoleLabel(user.role) : ''}</span>
             </div>
           </button>
         </DropdownMenuTrigger>

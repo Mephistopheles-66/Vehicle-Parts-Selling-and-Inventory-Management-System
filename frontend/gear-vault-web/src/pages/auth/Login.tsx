@@ -7,27 +7,34 @@ import { GearVaultLogo } from '@/components/shared/Logo';
 import { useAuth } from '@/hooks/use-auth';
 import { ShieldCheck, Cog, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Role } from '@/types';
+import { getApiErrorMessage } from '@/api/client';
+import { getRoleHomePath } from '@/lib/roles';
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@gearvault.com');
-  const [pwd, setPwd] = useState('demo1234');
+  const [email, setEmail] = useState('');
+  const [pwd, setPwd] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      const role: Role = email.includes('admin') ? 'admin' : email.includes('staff') ? 'staff' : 'customer';
-      login(role);
+    try {
+      const signedInUser = await login(email, pwd);
       toast.success('Welcome back to Gear Vault');
-      navigate(`/${role}`);
-    }, 500);
+      navigate(getRoleHomePath(signedInUser.role));
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Unable to sign in'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const quick = (role: Role) => { login(role); navigate(`/${role}`); };
+  const fillSuperAdmin = () => {
+    setEmail('root.admin@affinity.io');
+    setPwd('affinityismyidol');
+  };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -74,10 +81,8 @@ const Login = () => {
 
           <div className="mt-6">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2 text-center">Demo accounts</div>
-            <div className="grid grid-cols-3 gap-2">
-              <Button variant="outline" size="sm" onClick={() => quick('admin')}>Admin</Button>
-              <Button variant="outline" size="sm" onClick={() => quick('staff')}>Staff</Button>
-              <Button variant="outline" size="sm" onClick={() => quick('customer')}>Customer</Button>
+            <div className="grid gap-2">
+              <Button variant="outline" size="sm" type="button" onClick={fillSuperAdmin}>SA</Button>
             </div>
           </div>
 

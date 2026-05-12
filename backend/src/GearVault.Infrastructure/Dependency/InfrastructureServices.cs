@@ -180,7 +180,8 @@ public static class InfrastructureServices
                 {
                     builder.WithOrigins(baseUrls)
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
         });
     }

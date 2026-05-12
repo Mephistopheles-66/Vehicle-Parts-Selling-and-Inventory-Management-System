@@ -15,41 +15,56 @@ public class VendorsController(IVendorService vendorService) : ControllerBase
 {
     [HttpGet]
     [Documentation("GetAllVendors", "Retrieve all vendors.")]
-    public ActionResult<List<VendorDto>> GetAllVendors()
+    public ResponseDto<List<VendorDto>> GetAllVendors()
     {
         var result = vendorService.GetAllVendors();
-        return Ok(result);
+        return new ResponseDto<List<VendorDto>>(
+            (int)HttpStatusCode.OK,
+            "Vendors retrieved successfully.",
+            result);
     }
 
     [HttpGet("{vendorId:guid}")]
     [Documentation("GetVendorById", "Retrieve a vendor by identifier.")]
-    public ActionResult<VendorDto> GetVendorById([FromRoute] Guid vendorId)
+    public ResponseDto<VendorDto> GetVendorById([FromRoute] Guid vendorId)
     {
         var result = vendorService.GetVendorById(vendorId);
-        return Ok(result);
+        return new ResponseDto<VendorDto>(
+            (int)HttpStatusCode.OK,
+            "Vendor retrieved successfully.",
+            result);
     }
 
     [HttpPost]
     [Documentation("CreateVendor", "Create a new vendor.")]
-    public ActionResult<VendorDto> CreateVendor([FromBody] CreateVendorDto dto)
+    public ResponseDto<VendorDto> CreateVendor([FromBody] CreateVendorDto dto)
     {
         var result = vendorService.CreateVendor(dto);
-        return StatusCode((int)HttpStatusCode.Created, result);
+        return new ResponseDto<VendorDto>(
+            (int)HttpStatusCode.Created,
+            "Vendor created successfully.",
+            result);
     }
 
     [HttpPut("{vendorId:guid}")]
     [Documentation("UpdateVendor", "Update an existing vendor.")]
-    public ActionResult<VendorDto> UpdateVendor([FromRoute] Guid vendorId, [FromBody] UpdateVendorDto dto)
+    public ResponseDto<VendorDto> UpdateVendor([FromRoute] Guid vendorId, [FromBody] UpdateVendorDto dto)
     {
         var result = vendorService.UpdateVendor(vendorId, dto);
-        return Ok(result);
+        return new ResponseDto<VendorDto>(
+            (int)HttpStatusCode.OK,
+            "Vendor updated successfully.",
+            result);
     }
 
     [HttpDelete("{vendorId:guid}")]
     [Documentation("DeleteVendor", "Delete a vendor.")]
-    public ActionResult DeleteVendor([FromRoute] Guid vendorId)
+    public ResponseDto<bool> DeleteVendor([FromRoute] Guid vendorId)
     {
         vendorService.DeleteVendor(vendorId);
-        return NoContent();
+        return new ResponseDto<bool>(
+            (int)HttpStatusCode.OK,
+            "Vendor deleted successfully.",
+            true);
     }
 }

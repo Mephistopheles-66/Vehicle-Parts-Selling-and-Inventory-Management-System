@@ -13,7 +13,7 @@ public static class AssetExtensionMethods
     {
         return new AssetDto
         {
-            FileUrl = asset.FileUrl,
+            FileUrl = $"http://localhost:5165/images/user-images/{asset.FileUrl}",
             OriginalFileName = asset.OriginalFileName,
             AspectRatio = asset.AspectRatio,
             Orientation = asset.Orientation

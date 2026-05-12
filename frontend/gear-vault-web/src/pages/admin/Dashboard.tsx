@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   return (
     <div>
       <PageHeader
-        title="Admin Dashboard"
+        title="Super Admin Dashboard"
         description="Pulse of the entire Gear Vault operation."
         actions={<Button asChild><Link to="/admin/reports">View reports</Link></Button>}
       />

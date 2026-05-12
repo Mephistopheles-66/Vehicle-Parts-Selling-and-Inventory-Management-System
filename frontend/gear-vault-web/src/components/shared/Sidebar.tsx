@@ -4,12 +4,13 @@ import {
   BarChart3, AlertTriangle, Calendar, MessageSquare, Wrench,
   Car, Sparkles, Receipt, Star, Search, History, UserCog, Building2, Mail, Settings
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { Role } from '@/types';
 import { GearVaultWordmark } from '@/components/shared/Logo';
 import { cn } from '@/lib/utils';
 import { parts } from '@/data/mock';
 
-interface NavItem { to: string; label: string; icon: any; alert?: boolean; }
+interface NavItem { to: string; label: string; icon: LucideIcon; alert?: boolean; }
 interface NavGroup { label: string; items: NavItem[]; }
 
 const lowStockCount = parts.filter(p => p.stock < 10).length;
@@ -75,7 +76,7 @@ const customerNav: NavGroup[] = [
 ];
 
 export const Sidebar = ({ role }: { role: Role }) => {
-  const groups = role === 'admin' ? adminNav : role === 'staff' ? staffNav : customerNav;
+  const groups = role === 'super-admin' ? adminNav : role === 'staff' ? staffNav : customerNav;
   const { pathname } = useLocation();
 
   return (
@@ -91,12 +92,12 @@ export const Sidebar = ({ role }: { role: Role }) => {
             </div>
             <div className="space-y-0.5">
               {group.items.map(item => {
-                const active = pathname === item.to || (item.to !== `/${role}` && pathname.startsWith(item.to));
+                const active = pathname === item.to || pathname.startsWith(item.to);
                 return (
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    end={item.to === `/${role}`}
+                    end={item.to === '/admin' || item.to === `/${role}`}
                     className={cn(
                       'group flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-all duration-200',
                       'border-l-[3px] border-transparent',

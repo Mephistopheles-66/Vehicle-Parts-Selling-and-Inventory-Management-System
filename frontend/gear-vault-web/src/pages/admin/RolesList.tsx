@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ShieldCheck } from 'lucide-react';
 
 const roles = [
-  { name: 'Admin', desc: 'Full system access. Manages users, parts, vendors, reports.', perms: 12 },
+  { name: 'Super Admin', desc: 'Full system access. Manages users, parts, vendors, reports.', perms: 12 },
   { name: 'Staff', desc: 'POS, customers, appointments, sales invoices.', perms: 7 },
   { name: 'Customer', desc: 'Self-service portal: vehicles, bookings, invoices, AI health.', perms: 5 },
 ];
