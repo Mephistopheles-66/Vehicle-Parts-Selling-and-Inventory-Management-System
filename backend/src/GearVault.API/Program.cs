@@ -27,12 +27,6 @@ services.AddSwaggerConfiguration();
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionMiddleware>();
-
-app.UseMiddleware<TokenCookieMiddleware>();
-
-app.UseMiddleware<RequestNormalizationMiddleware>();
-
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -45,6 +39,10 @@ app.UseRouting();
 
 app.UseCors(Constants.Cors.MyAllowSpecificOrigins);
 
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<TokenCookieMiddleware>();
+app.UseMiddleware<RequestNormalizationMiddleware>();
+
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>
@@ -53,7 +51,6 @@ app.UseStaticFiles(new StaticFileOptions
 
         context.Context.Response.Headers[HeaderNames.AccessControlAllowOrigin] = origin;
         context.Context.Response.Headers[HeaderNames.Vary] = "Origin";
-
         context.Context.Response.Headers["Cross-Origin-Resource-Policy"] = "cross-origin";
     }
 });
@@ -63,8 +60,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseHttpsRedirection();
 
 app.MapControllers();
 

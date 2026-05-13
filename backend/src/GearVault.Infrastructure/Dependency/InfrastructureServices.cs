@@ -166,7 +166,10 @@ public static class InfrastructureServices
 
         configuration.GetSection(nameof(ClientSettings)).Bind(clientSettings);
 
-        var baseUrls = clientSettings.BaseUrl.Split(";");
+        var baseUrls = clientSettings.BaseUrl
+            .Split(";", StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .ToArray();
 
         foreach (var baseUrl in baseUrls)
         {
@@ -175,14 +178,13 @@ public static class InfrastructureServices
 
         services.AddCors(options =>
         {
-            options.AddPolicy(name: Constants.Cors.MyAllowSpecificOrigins,
-                builder =>
-                {
-                    builder.WithOrigins(baseUrls)
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                });
+            options.AddPolicy(Constants.Cors.MyAllowSpecificOrigins, policy =>
+            {
+                policy.WithOrigins(baseUrls)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
         });
     }
 }
