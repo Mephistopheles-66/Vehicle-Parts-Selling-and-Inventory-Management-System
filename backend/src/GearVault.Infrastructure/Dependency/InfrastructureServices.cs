@@ -107,7 +107,7 @@ public static class InfrastructureServices
         #endregion
 
         #region CORS Configuration
-        // services.EnableCors(configuration);
+        services.EnableCors(configuration);
         #endregion
 
         #region Registration of Background Hosted Services
