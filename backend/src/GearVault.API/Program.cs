@@ -43,7 +43,7 @@ app.AddCustomScalarInterface();
 
 app.UseRouting();
 
-app.UseCors(Constants.Cors.MyAllowSpecificOrigins);
+// app.UseCors(Constants.Cors.MyAllowSpecificOrigins);
 
 app.UseStaticFiles(new StaticFileOptions
 {
