@@ -3,6 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BooleanResponseDto } from '../models/BooleanResponseDto';
+import type { CustomerFullProfileDtoResponseDto } from '../models/CustomerFullProfileDtoResponseDto';
+import type { CustomerSearchResultDtoListResponseDto } from '../models/CustomerSearchResultDtoListResponseDto';
+import type { GuidResponseDto } from '../models/GuidResponseDto';
+import type { RegisterWalkInCustomerDto } from '../models/RegisterWalkInCustomerDto';
 import type { UserDtoCollectionDto } from '../models/UserDtoCollectionDto';
 import type { UserDtoListResponseDto } from '../models/UserDtoListResponseDto';
 import type { UserDtoResponseDto } from '../models/UserDtoResponseDto';
@@ -196,6 +200,70 @@ export class UserService {
             url: '/api/v1/user/{userId}/activate-deactivate',
             path: {
                 'userId': userId,
+            },
+        });
+    }
+    /**
+     * SearchCustomers
+     * Search customers by name, phone, email, ID, or vehicle number. Returns each customer with all of their vehicles. Staff-only.
+     * @returns CustomerSearchResultDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static searchCustomers({
+        q,
+        limit = 20,
+    }: {
+        q?: string,
+        limit?: number,
+    }): CancelablePromise<CustomerSearchResultDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/customers/search',
+            query: {
+                'q': q,
+                'limit': limit,
+            },
+        });
+    }
+    /**
+     * RegisterWalkInCustomer
+     * Staff registers a walk-in customer along with their vehicles. Auto-generates username and password; emails the password to the customer.
+     * @returns GuidResponseDto OK
+     * @throws ApiError
+     */
+    public static registerWalkInCustomer({
+        requestBody,
+    }: {
+        requestBody?: RegisterWalkInCustomerDto,
+    }): CancelablePromise<GuidResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/user/customers/walk-in',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * GetCustomerFullProfile
+     * Retrieve a customer's aggregated profile: their info, vehicles, recent invoices, and totals. Staff-only.
+     * @returns CustomerFullProfileDtoResponseDto OK
+     * @throws ApiError
+     */
+    public static getCustomerFullProfile({
+        customerId,
+        recentInvoiceLimit = 20,
+    }: {
+        customerId: string,
+        recentInvoiceLimit?: number,
+    }): CancelablePromise<CustomerFullProfileDtoResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/customers/{customerId}/full-profile',
+            path: {
+                'customerId': customerId,
+            },
+            query: {
+                'recentInvoiceLimit': recentInvoiceLimit,
             },
         });
     }

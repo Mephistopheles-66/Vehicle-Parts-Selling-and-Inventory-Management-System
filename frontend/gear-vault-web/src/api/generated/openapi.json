@@ -2802,6 +2802,159 @@
         }
       }
     },
+    "/api/v1/user/customers/search": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "SearchCustomers",
+        "description": "Search customers by name, phone, email, ID, or vehicle number. Returns each customer with all of their vehicles. Staff-only.",
+        "operationId": "SearchCustomers",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSearchResultDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSearchResultDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSearchResultDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/customers/walk-in": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "RegisterWalkInCustomer",
+        "description": "Staff registers a walk-in customer along with their vehicles. Auto-generates username and password; emails the password to the customer.",
+        "operationId": "RegisterWalkInCustomer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterWalkInCustomerDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterWalkInCustomerDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterWalkInCustomerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuidResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuidResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuidResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/customers/{customerId}/full-profile": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "GetCustomerFullProfile",
+        "description": "Retrieve a customer's aggregated profile: their info, vehicles, recent invoices, and totals. Staff-only.",
+        "operationId": "GetCustomerFullProfile",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "recentInvoiceLimit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerFullProfileDtoResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerFullProfileDtoResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerFullProfileDtoResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/vehicles": {
       "get": {
         "tags": [
@@ -3020,6 +3173,49 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BooleanResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vehicles/by-customer/{customerId}": {
+      "get": {
+        "tags": [
+          "Vehicles"
+        ],
+        "summary": "GetVehiclesByCustomerId",
+        "description": "Retrieve all vehicles owned by a given customer. Staff-only.",
+        "operationId": "GetVehiclesByCustomerId",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDtoListResponseDto"
                 }
               }
             }
@@ -3673,6 +3869,124 @@
         },
         "additionalProperties": false
       },
+      "CreateWalkInVehicleDto": {
+        "type": "object",
+        "properties": {
+          "vehicleNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "licenseNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "make": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fuelType": {
+            "$ref": "#/components/schemas/FuelType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerFullProfileDto": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleDto"
+            },
+            "nullable": true
+          },
+          "recentInvoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesInvoiceDto"
+            },
+            "nullable": true
+          },
+          "totalInvoiceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lifetimeSpend": {
+            "type": "number",
+            "format": "double"
+          },
+          "outstandingBalance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerFullProfileDtoResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "$ref": "#/components/schemas/CustomerFullProfileDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerSearchResultDto": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerSearchResultDtoListResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerSearchResultDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FuelType": {
         "enum": [
           "Petrol",
@@ -4113,6 +4427,35 @@
           "total": {
             "type": "number",
             "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterWalkInCustomerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateWalkInVehicleDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
