@@ -9,6 +9,8 @@ using GearVault.Application.Common.Helper;
 using GearVault.Application.DTOs.Emails;
 using GearVault.Application.Interfaces.Services;
 using GearVault.Application.Interfaces.Repositories;
+using GearVault.Application.DTOs.Vehicles;
+using GearVault.Application.DTOs.SalesInvoices;
 
 namespace GearVault.Infrastructure.Implementation.Services;
 
@@ -137,6 +139,83 @@ public class UserService(
         return userModel.ToUserDto(role);
     }
 
+    public List<CustomerSearchResultDto> SearchCustomers(string searchTerm, int limit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            throw new BadRequestException("Search term cannot be empty.");
+
+        if (limit <= 0 || limit > 100) limit = 20;
+
+        var term = searchTerm.Trim().ToLower();
+        var customerRoleId = Guid.Parse(Constants.Roles.Customer.Id);
+
+        // Try parsing as a Guid — supports search by customer ID.
+        Guid? idMatch = Guid.TryParse(term, out var parsedId) ? parsedId : null;
+
+        // Step 1: find customers (RoleId = Customer) whose own fields match.
+        var directMatches = genericRepository.Get<User>(
+            u =>
+                u.RoleId == customerRoleId &&
+                (
+                    (idMatch != null && u.Id == idMatch) ||
+                    u.Name.ToLower().Contains(term) ||
+                    u.PhoneNumber.ToLower().Contains(term) ||
+                    u.EmailAddress.ToLower().Contains(term)
+                )
+        ).Take(limit).ToList();
+
+        // Step 2: find vehicles whose number matches; collect their owner user IDs.
+        var vehicleMatches = genericRepository.Get<Vehicle>(
+            v => v.VehicleNumber.ToLower().Contains(term)
+                 || v.LicenseNumber.ToLower().Contains(term)
+        ).Take(limit).ToList();
+
+        var matchedCustomerIds = vehicleMatches
+            .Select(v => v.UserId)
+            .Except(directMatches.Select(c => c.Id))
+            .ToHashSet();
+
+        // Step 3: load the additional customers from vehicle matches.
+        var indirectMatches = matchedCustomerIds.Count > 0
+            ? genericRepository.Get<User>(
+                u => u.RoleId == customerRoleId && matchedCustomerIds.Contains(u.Id)
+            ).ToList()
+            : new List<User>();
+
+        var allCustomers = directMatches.Concat(indirectMatches).Take(limit).ToList();
+
+        if (allCustomers.Count == 0) return new List<CustomerSearchResultDto>();
+
+        // Step 4: load all vehicles for the matched customers in one query.
+        var customerIds = allCustomers.Select(c => c.Id).ToHashSet();
+
+        var allVehicles = genericRepository.Get<Vehicle>(
+            v => customerIds.Contains(v.UserId)
+        ).ToList();
+
+        var vehiclesByCustomer = allVehicles
+            .GroupBy(v => v.UserId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Step 5: load the Customer role so UserDto includes role info.
+        var customerRole = genericRepository.GetById<Role>(customerRoleId);
+
+        // Step 6: project to result DTOs.
+        return allCustomers
+            .Select(c =>
+            {
+                c.Role = customerRole;
+                return new CustomerSearchResultDto
+                {
+                    Customer = c.ToUserDto(),
+                    Vehicles = (vehiclesByCustomer.GetValueOrDefault(c.Id) ?? new List<Vehicle>())
+                        .Select(v => v.ToVehicleDto(c))
+                        .ToList()
+                };
+            })
+            .ToList();
+    }
+
     public void RegisterUser(RegisterUserDto user)
     {
         var duplicateUser = genericRepository.GetFirstOrDefault<User>(x => x.Username == user.Username || x.EmailAddress == user.EmailAddress || x.PhoneNumber == user.PhoneNumber);
@@ -258,5 +337,219 @@ public class UserService(
         userModel.ActivateDeactivateEntity();
 
         genericRepository.Update(userModel);
+    }
+
+    public Guid RegisterWalkInCustomer(RegisterWalkInCustomerDto dto)
+    {
+        // 1. Validate required fields.
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            throw new BadRequestException("Customer name is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            throw new BadRequestException("Customer phone number is required.");
+
+        if (string.IsNullOrWhiteSpace(dto.EmailAddress))
+            throw new BadRequestException("Customer email address is required.");
+
+        if (!dto.EmailAddress.Contains('@'))
+            throw new BadRequestException("Email address is not in a valid format.");
+
+        // 2. Check for duplicates against existing Users.
+        var duplicate = genericRepository.GetFirstOrDefault<User>(
+            x => x.PhoneNumber == dto.PhoneNumber || x.EmailAddress == dto.EmailAddress);
+
+        if (duplicate != null)
+            throw new BadRequestException("A user with this phone number or email already exists.");
+
+        // 3. Validate vehicle inputs for duplicates within request and against the database.
+        var vehicleNumbers = dto.Vehicles
+            .Select(v => v.VehicleNumber.Trim())
+            .Where(v => !string.IsNullOrEmpty(v))
+            .ToList();
+
+        if (vehicleNumbers.Distinct(StringComparer.OrdinalIgnoreCase).Count() != vehicleNumbers.Count)
+            throw new BadRequestException("Duplicate vehicle numbers in request.");
+
+        foreach (var vn in vehicleNumbers)
+        {
+            if (genericRepository.Exists<Vehicle>(v => v.VehicleNumber == vn))
+                throw new BadRequestException($"Vehicle number '{vn}' is already registered.");
+        }
+
+        // 4. Look up the Customer role.
+        var customerRoleId = Guid.Parse(Constants.Roles.Customer.Id);
+        var customerRole = genericRepository.GetById<Role>(customerRoleId)
+            ?? throw new NotFoundException("Customer role is not configured.");
+
+        // 5. Generate a username and a temporary password.
+        var baseUsername = $"cust_{dto.PhoneNumber.Trim()}";
+        var username = baseUsername;
+        var suffix = 0;
+        while (genericRepository.Exists<User>(u => u.Username == username))
+        {
+            suffix++;
+            username = $"{baseUsername}_{suffix}";
+        }
+
+        var tempPassword = GenerateTemporaryPassword();
+        var passwordHash = tempPassword.Hash();
+
+        // 6. Create the user (mark as verified — staff vouches for them).
+        var user = new User(
+            roleId: customerRole.Id,
+            name: dto.Name.Trim(),
+            username: username,
+            emailAddress: dto.EmailAddress.Trim(),
+            address: string.IsNullOrWhiteSpace(dto.Address) ? null : dto.Address.Trim(),
+            profileImage: null,
+            passwordHash: passwordHash,
+            phoneNumber: dto.PhoneNumber.Trim(),
+            isVerified: true,
+            verificationCode: null);
+
+        var userId = genericRepository.Insert(user);
+
+        // 7. Create the vehicles linked to the new user.
+        if (dto.Vehicles.Count > 0)
+        {
+            var vehicles = dto.Vehicles
+                .Where(v => !string.IsNullOrWhiteSpace(v.VehicleNumber))
+                .Select(v => new Vehicle(
+                    userId,
+                    v.VehicleNumber.Trim(),
+                    v.LicenseNumber?.Trim() ?? string.Empty,
+                    v.Make.Trim(),
+                    v.Model.Trim(),
+                    v.Year,
+                    v.FuelType
+                )).ToList();
+
+            if (vehicles.Count > 0)
+                genericRepository.AddMultipleEntity(vehicles);
+        }
+
+        // 8. Queue a welcome email with the temporary password.
+        var emailPayload = new RegistrationConfirmationDto
+        {
+            UserId = userId,
+            Password = tempPassword.Encrypt(Constants.Password.SecretKey)
+        };
+
+        var outbox = new EmailOutbox(
+            dto.EmailAddress.Trim(),
+            dto.Name.Trim(),
+            "Welcome — your customer account at GearVault",
+            EmailProcess.UserRegistration,
+            JsonSerializer.Serialize(emailPayload));
+
+        genericRepository.Insert(outbox);
+
+        return userId;
+    }
+
+    private static string GenerateTemporaryPassword()
+    {
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+        var bytes = new byte[10];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+        var result = new char[10];
+        for (int i = 0; i < 10; i++)
+        {
+            result[i] = chars[bytes[i] % chars.Length];
+        }
+        return new string(result);
+    }
+
+    public CustomerFullProfileDto GetCustomerFullProfile(Guid customerId, int recentInvoiceLimit = 20)
+    {
+        if (recentInvoiceLimit <= 0 || recentInvoiceLimit > 100) recentInvoiceLimit = 20;
+
+        // 1. Load the customer.
+        var customer = genericRepository.GetById<User>(customerId)
+            ?? throw new NotFoundException("Customer not found.");
+
+        var role = genericRepository.GetById<Role>(customer.RoleId);
+        customer.Role = role;
+
+        // 2. Load all the customer's vehicles.
+        var vehicles = genericRepository.Get<Vehicle>(
+            v => v.UserId == customerId,
+            asNoTracking: true
+        ).ToList();
+
+        // 3. Load all sales invoices for the customer (via their vehicles).
+        var vehicleIds = vehicles.Select(v => v.Id).ToHashSet();
+
+        var allInvoices = vehicleIds.Count > 0
+            ? genericRepository.Get<SalesInvoice>(
+                i => vehicleIds.Contains(i.VehicleId),
+                asNoTracking: true
+            ).ToList()
+            : new List<SalesInvoice>();
+
+        var totalInvoiceCount = allInvoices.Count;
+        var lifetimeSpend = allInvoices.Sum(i => i.TotalAmount);
+        var outstandingBalance = allInvoices
+            .Where(i => i.PaymentStatus != PaymentStatus.Paid)
+            .Sum(i => i.BalanceDue);
+
+        var recentInvoices = allInvoices
+            .OrderByDescending(i => i.CreatedAt)
+            .Take(recentInvoiceLimit)
+            .ToList();
+
+        // 4. Hydrate the recent invoices with their items + staff names.
+        var invoiceIds = recentInvoices.Select(i => i.Id).ToHashSet();
+        var staffIds = recentInvoices.Select(i => i.StaffId).Distinct().ToHashSet();
+
+        var invoiceVehicles = vehicles.ToDictionary(v => v.Id, v => v);
+
+        var staffUsers = genericRepository.Get<User>(u => staffIds.Contains(u.Id))
+            .ToDictionary(u => u.Id, u => u);
+
+        var items = invoiceIds.Count > 0
+            ? genericRepository.Get<SalesInvoiceItem>(i => invoiceIds.Contains(i.SalesInvoiceId))
+                .GroupBy(i => i.SalesInvoiceId)
+                .ToDictionary(g => g.Key, g => g.ToList())
+            : new Dictionary<Guid, List<SalesInvoiceItem>>();
+
+        var partIds = items.Values
+            .SelectMany(x => x)
+            .Select(i => i.PartId)
+            .Distinct()
+            .ToHashSet();
+
+        var parts = partIds.Count > 0
+            ? genericRepository.Get<Part>(p => partIds.Contains(p.Id))
+                .ToDictionary(p => p.Id, p => p)
+            : new Dictionary<Guid, Part>();
+
+        var invoiceDtos = recentInvoices.Select(invoice =>
+        {
+            invoiceVehicles.TryGetValue(invoice.VehicleId, out var vehicle);
+            staffUsers.TryGetValue(invoice.StaffId, out var staff);
+
+            var invoiceItems = items.GetValueOrDefault(invoice.Id) ?? new List<SalesInvoiceItem>();
+            foreach (var item in invoiceItems)
+            {
+                if (parts.TryGetValue(item.PartId, out var part))
+                {
+                    item.Part = part;
+                }
+            }
+
+            return invoice.ToSalesInvoiceDto(customer, vehicle!, staff, invoiceItems);
+        }).ToList();
+
+        // 5. Project.
+        return new CustomerFullProfileDto
+        {
+            Customer = customer.ToUserDto(),
+            Vehicles = vehicles.Select(v => v.ToVehicleDto(customer)).ToList(),
+            RecentInvoices = invoiceDtos,
+            TotalInvoiceCount = totalInvoiceCount,
+            LifetimeSpend = lifetimeSpend,
+            OutstandingBalance = outstandingBalance
+        };
     }
 }
