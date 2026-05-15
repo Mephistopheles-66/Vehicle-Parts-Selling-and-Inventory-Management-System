@@ -122,4 +122,44 @@ public class UserController(IUserService userService) : BaseController<UserContr
             "User status updated successfully.",
             true);
     }
+
+    [HttpGet("customers/search")]
+    [Documentation("SearchCustomers", "Search customers by name, phone, email, ID, or vehicle number. Returns each customer with all of their vehicles. Staff-only.")]
+    public ResponseDto<List<CustomerSearchResultDto>> SearchCustomers(
+        [FromQuery] string q,
+        [FromQuery] int limit = 20)
+    {
+        var result = userService.SearchCustomers(q, limit);
+
+        return new ResponseDto<List<CustomerSearchResultDto>>(
+            (int)HttpStatusCode.OK,
+            "Successfully searched customers.",
+            result);
+    }
+
+    [HttpPost("customers/walk-in")]
+    [Documentation("RegisterWalkInCustomer", "Staff registers a walk-in customer along with their vehicles. Auto-generates username and password; emails the password to the customer.")]
+    public ResponseDto<Guid> RegisterWalkInCustomer([FromBody] RegisterWalkInCustomerDto dto)
+    {
+        var customerId = userService.RegisterWalkInCustomer(dto);
+
+        return new ResponseDto<Guid>(
+            (int)HttpStatusCode.OK,
+            "Customer registered successfully.",
+            customerId);
+    }
+
+    [HttpGet("customers/{customerId:guid}/full-profile")]
+    [Documentation("GetCustomerFullProfile", "Retrieve a customer's aggregated profile: their info, vehicles, recent invoices, and totals. Staff-only.")]
+    public ResponseDto<CustomerFullProfileDto> GetCustomerFullProfile(
+        [FromRoute] Guid customerId,
+        [FromQuery] int recentInvoiceLimit = 20)
+    {
+        var result = userService.GetCustomerFullProfile(customerId, recentInvoiceLimit);
+
+        return new ResponseDto<CustomerFullProfileDto>(
+            (int)HttpStatusCode.OK,
+            "Successfully fetched customer profile.",
+            result);
+    }
 }

@@ -36,6 +36,20 @@ public class VehicleService(
         return vehicle.ToVehicleDto();
     }
 
+    public List<VehicleDto> GetVehiclesByCustomerId(Guid customerId)
+    {
+        var customer = genericRepository.GetById<User>(customerId)
+            ?? throw new NotFoundException("Customer not found.");
+
+        var vehicles = genericRepository.Get<Vehicle>(
+            v => v.UserId == customerId,
+            asNoTracking: true,
+            includeProperties: "User"
+        ).ToList();
+
+        return vehicles.ConvertAll(v => v.ToVehicleDto(customer));
+    }
+
     public VehicleDto CreateVehicle(CreateVehicleDto dto)
     {
         var userId = applicationUserService.GetUserId;

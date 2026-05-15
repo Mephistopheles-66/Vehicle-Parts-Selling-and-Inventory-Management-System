@@ -7,6 +7,10 @@ public interface IVehicleService : ITransientService
 {
     List<VehicleDto> GetMyVehicles();
 
+    // Returns all vehicles for a given customer.
+    // Staff-only — does NOT enforce ownership check.
+    List<VehicleDto> GetVehiclesByCustomerId(Guid customerId);
+
     VehicleDto GetVehicleById(Guid vehicleId);
 
     VehicleDto CreateVehicle(CreateVehicleDto dto);
