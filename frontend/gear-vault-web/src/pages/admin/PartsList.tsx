@@ -55,20 +55,20 @@ const PartsList = () => {
             <table className="w-full text-sm">
               <thead className="bg-deep-navy text-white sticky top-0">
                 <tr className="text-left">
-                  {['Part','Part No.','Category','Stock','Reorder','Price','Status','Actions'].map(h => (
+                  {['Part','Part No.','Category','Unit','Stock','Reorder','Price','Status','Actions'].map(h => (
                     <th key={h} className="px-4 py-3 font-medium text-xs uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {isLoading && (
-                  <tr><td className="px-4 py-8 text-center text-muted-foreground" colSpan={8}>Loading parts...</td></tr>
+                  <tr><td className="px-4 py-8 text-center text-muted-foreground" colSpan={9}>Loading parts...</td></tr>
                 )}
                 {error && (
-                  <tr><td className="px-4 py-8 text-center text-destructive" colSpan={8}>{getApiErrorMessage(error, 'Unable to load parts')}</td></tr>
+                  <tr><td className="px-4 py-8 text-center text-destructive" colSpan={9}>{getApiErrorMessage(error, 'Unable to load parts')}</td></tr>
                 )}
                 {!isLoading && !error && filtered.length === 0 && (
-                  <tr><td className="px-4 py-8 text-center text-muted-foreground" colSpan={8}>No parts found.</td></tr>
+                  <tr><td className="px-4 py-8 text-center text-muted-foreground" colSpan={9}>No parts found.</td></tr>
                 )}
                 {filtered.map((p, i) => (
                   <tr key={p.id} className={`border-b hover:bg-secondary/40 transition-colors ${i % 2 ? 'bg-canvas' : ''}`}>
@@ -80,6 +80,7 @@ const PartsList = () => {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.partNumber}</td>
                     <td className="px-4 py-3"><StatusBadge variant="neutral">{p.category}</StatusBadge></td>
+                    <td className="px-4 py-3 text-muted-foreground">{p.unit ?? '-'}</td>
                     <td className="px-4 py-3 tabular">
                       {(p.stockQuantity ?? 0) <= (p.reorderLevel ?? 0)
                         ? <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-destructive pulse-dot" /><span className="text-destructive font-medium">{p.stockQuantity ?? 0}</span></span>

@@ -7,7 +7,7 @@ import { Plus, Search, ShieldCheck, UserCog } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RoleService, UserService } from '@/api/generated/client';
+import { UserService, RoleService } from '@/api/generated/client';
 import { getApiErrorMessage, roleFromApi } from '@/api/client';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,12 +40,14 @@ const UsersList = () => {
     queryFn: () => UserService.getAllUsersList({ globalSearch: q || undefined }),
   });
   const { data: rolesResponse } = useQuery({
-    queryKey: ['roles', 'available'],
-    queryFn: () => RoleService.getAllAvailableRolesList({ isActive: [true], orderBys: ['name'] }),
+    queryKey: ['roles'],
+    queryFn: () => RoleService.getAllRolesList({}),
   });
 
   const users = usersResponse?.result ?? [];
-  const roles = rolesResponse?.result ?? [];
+  const roleOptions = (rolesResponse?.result ?? []).filter(
+    r => r.name?.toLowerCase() === 'staff' || r.name?.toLowerCase() === 'customer'
+  );
 
   const createMutation = useMutation({
     mutationFn: () => UserService.registerUser({
@@ -103,7 +105,7 @@ const UsersList = () => {
                 <div><Label>Role</Label>
                   <Select value={form.roleId} onValueChange={value => setField('roleId', value)} required>
                     <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select role" /></SelectTrigger>
-                    <SelectContent>{roles.map(role => <SelectItem key={role.id} value={role.id ?? ''}>{role.name}</SelectItem>)}</SelectContent>
+                    <SelectContent>{roleOptions.map(role => <SelectItem key={role.id} value={role.id ?? ''}>{role.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-end gap-2">

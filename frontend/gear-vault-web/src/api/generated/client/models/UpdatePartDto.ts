@@ -8,6 +8,7 @@ export type UpdatePartDto = {
     description?: string | null;
     category?: string | null;
     unit?: string | null;
+    stockQuantity?: number | null;
     reorderLevel?: number | null;
     sellingPrice?: number | null;
     isActive?: boolean | null;

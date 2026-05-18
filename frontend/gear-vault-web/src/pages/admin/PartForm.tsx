@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, Package } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PartsService } from '@/api/generated/client';
@@ -15,14 +15,16 @@ import type { CreatePartDto, UpdatePartDto } from '@/api/generated/client';
 import { getApiErrorMessage, unwrapApiResult } from '@/api/client';
 
 const categories = ['Lubricants', 'Brakes', 'Electrical', 'Tires', 'Filters', 'Engine', 'Suspension', 'Accessories'];
-const units = ['Piece', 'Set', 'Pair', 'Liter', 'Kg', 'Box'];
+const units = ['PIECE', 'BOX', 'METER', 'LITER', 'KG'] as const;
+const unitLabels: Record<string, string> = { PIECE: 'Piece', BOX: 'Box', METER: 'Meter', LITER: 'Liter', KG: 'Kg' };
 
 const emptyForm = {
   name: '',
   partNumber: '',
   category: 'Brakes',
-  unit: 'Piece',
+  unit: 'PIECE',
   description: '',
+  stockQuantity: '0',
   sellingPrice: '',
   reorderLevel: '',
   isActive: 'true',
@@ -47,8 +49,9 @@ const PartForm = () => {
       name: part.name ?? '',
       partNumber: part.partNumber ?? '',
       category: part.category ?? 'Brakes',
-      unit: part.unit ?? 'Piece',
+      unit: part.unit ?? 'PIECE',
       description: part.description ?? '',
+      stockQuantity: String(part.stockQuantity ?? 0),
       sellingPrice: String(part.sellingPrice ?? ''),
       reorderLevel: String(part.reorderLevel ?? ''),
       isActive: String(part.isActive ?? true),
@@ -80,6 +83,7 @@ const PartForm = () => {
       category: form.category,
       unit: form.unit,
       description: form.description.trim() || null,
+      stockQuantity: Number(form.stockQuantity),
       sellingPrice: Number(form.sellingPrice),
       reorderLevel: Number(form.reorderLevel),
       isActive: form.isActive === 'true',
@@ -115,7 +119,7 @@ const PartForm = () => {
               <div><Label>Unit</Label>
                 <Select value={form.unit} onValueChange={value => setField('unit', value)}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>{units.map(unit => <SelectItem key={unit} value={unit}>{unit}</SelectItem>)}</SelectContent>
+                  <SelectContent>{units.map(u => <SelectItem key={u} value={u}>{unitLabels[u]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </CardContent>
@@ -124,10 +128,7 @@ const PartForm = () => {
         <div className="space-y-5">
           <Card><CardHeader><CardTitle className="text-base">Inventory</CardTitle></CardHeader>
             <CardContent>
-              <div className="aspect-square rounded-lg bg-secondary flex flex-col items-center justify-center text-muted-foreground">
-                <Package className="h-10 w-10 mb-2" />
-                <span className="text-sm">Stock is updated by invoices</span>
-              </div>
+              <div><Label>Stock quantity</Label><Input className="mt-1.5 font-mono" type="number" min="0" value={form.stockQuantity} onChange={e => setField('stockQuantity', e.target.value)} required /></div>
             </CardContent>
           </Card>
           <Card><CardHeader><CardTitle className="text-base">Status</CardTitle></CardHeader>

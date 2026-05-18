@@ -8,6 +8,7 @@ export type CreatePartDto = {
     description?: string | null;
     category?: string | null;
     unit?: string | null;
+    stockQuantity?: number;
     reorderLevel?: number;
     sellingPrice?: number;
     isActive?: boolean;

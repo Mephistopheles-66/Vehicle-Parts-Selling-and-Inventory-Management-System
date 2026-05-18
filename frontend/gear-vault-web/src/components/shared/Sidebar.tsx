@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, Truck, FileText, Users, ShieldCheck,
+  LayoutDashboard, Package, Truck, FileText, Users,
   BarChart3, AlertTriangle, Calendar, MessageSquare, Wrench,
   Car, Sparkles, Receipt, Star, Search, History, UserCog, Building2, Mail, Settings
 } from 'lucide-react';
@@ -8,30 +8,25 @@ import type { LucideIcon } from 'lucide-react';
 import type { Role } from '@/types';
 import { GearVaultWordmark } from '@/components/shared/Logo';
 import { cn } from '@/lib/utils';
-import { parts } from '@/data/mock';
 
 interface NavItem { to: string; label: string; icon: LucideIcon; alert?: boolean; }
 interface NavGroup { label: string; items: NavItem[]; }
-
-const lowStockCount = parts.filter(p => p.stock < 10).length;
 
 const adminNav: NavGroup[] = [
   { label: 'Overview', items: [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   ]},
   { label: 'Inventory', items: [
-    { to: '/admin/parts', label: 'Parts', icon: Package, alert: lowStockCount > 0 },
+    { to: '/admin/parts', label: 'Parts', icon: Package },
     { to: '/admin/vendors', label: 'Vendors', icon: Building2 },
     { to: '/admin/purchase-invoices', label: 'Purchase Invoices', icon: Truck },
     { to: '/admin/low-stock', label: 'Low Stock Alerts', icon: AlertTriangle },
   ]},
   { label: 'People', items: [
     { to: '/admin/users', label: 'Users', icon: UserCog },
-    { to: '/admin/roles', label: 'Roles', icon: ShieldCheck },
   ]},
   { label: 'Reports', items: [
     { to: '/admin/reports', label: 'Financial Reports', icon: BarChart3 },
-    { to: '/admin/inventory-report', label: 'Inventory Report', icon: FileText },
     { to: '/admin/overdue-credits', label: 'Overdue Credits', icon: Receipt },
   ]},
 ];
