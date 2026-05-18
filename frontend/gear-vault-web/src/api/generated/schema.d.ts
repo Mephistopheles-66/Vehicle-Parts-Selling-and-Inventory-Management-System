@@ -337,6 +337,27 @@ export type paths = {
      */
     patch: operations["ActivateDeactivateUser"];
   };
+  "/api/v1/user/customers/search": {
+    /**
+     * SearchCustomers
+     * @description Search customers by name, phone, email, ID, or vehicle number. Returns each customer with all of their vehicles. Staff-only.
+     */
+    get: operations["SearchCustomers"];
+  };
+  "/api/v1/user/customers/walk-in": {
+    /**
+     * RegisterWalkInCustomer
+     * @description Staff registers a walk-in customer along with their vehicles. Auto-generates username and password; emails the password to the customer.
+     */
+    post: operations["RegisterWalkInCustomer"];
+  };
+  "/api/v1/user/customers/{customerId}/full-profile": {
+    /**
+     * GetCustomerFullProfile
+     * @description Retrieve a customer's aggregated profile: their info, vehicles, recent invoices, and totals. Staff-only.
+     */
+    get: operations["GetCustomerFullProfile"];
+  };
   "/api/vehicles": {
     /**
      * GetMyVehicles
@@ -365,6 +386,13 @@ export type paths = {
      * @description Delete a vehicle.
      */
     delete: operations["DeleteVehicle"];
+  };
+  "/api/vehicles/by-customer/{customerId}": {
+    /**
+     * GetVehiclesByCustomerId
+     * @description Retrieve all vehicles owned by a given customer. Staff-only.
+     */
+    get: operations["GetVehiclesByCustomerId"];
   };
   "/api/vendors": {
     /**
@@ -544,6 +572,42 @@ export type components = {
       address?: string | null;
       isActive?: boolean;
     };
+    CreateWalkInVehicleDto: {
+      vehicleNumber?: string | null;
+      licenseNumber?: string | null;
+      make?: string | null;
+      model?: string | null;
+      /** Format: int32 */
+      year?: number;
+      fuelType?: components["schemas"]["FuelType"];
+    };
+    CustomerFullProfileDto: {
+      customer?: components["schemas"]["UserDto"];
+      vehicles?: components["schemas"]["VehicleDto"][] | null;
+      recentInvoices?: components["schemas"]["SalesInvoiceDto"][] | null;
+      /** Format: int32 */
+      totalInvoiceCount?: number;
+      /** Format: double */
+      lifetimeSpend?: number;
+      /** Format: double */
+      outstandingBalance?: number;
+    };
+    CustomerFullProfileDtoResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["CustomerFullProfileDto"];
+    };
+    CustomerSearchResultDto: {
+      customer?: components["schemas"]["UserDto"];
+      vehicles?: components["schemas"]["VehicleDto"][] | null;
+    };
+    CustomerSearchResultDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["CustomerSearchResultDto"][] | null;
+    };
     /** @enum {string} */
     FuelType: "Petrol" | "Diesel" | "Gas" | "Electric" | "Hybrid" | "CNG" | "LPG";
     GuidResponseDto: {
@@ -697,6 +761,13 @@ export type components = {
       unitPrice?: number;
       /** Format: double */
       total?: number;
+    };
+    RegisterWalkInCustomerDto: {
+      name?: string | null;
+      emailAddress?: string | null;
+      phoneNumber?: string | null;
+      address?: string | null;
+      vehicles?: components["schemas"]["CreateWalkInVehicleDto"][] | null;
     };
     RescheduleAppointmentDto: {
       /** Format: date-time */
@@ -2171,6 +2242,75 @@ export type operations = {
     };
   };
   /**
+   * SearchCustomers
+   * @description Search customers by name, phone, email, ID, or vehicle number. Returns each customer with all of their vehicles. Staff-only.
+   */
+  SearchCustomers: {
+    parameters: {
+      query?: {
+        q?: string;
+        limit?: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["CustomerSearchResultDtoListResponseDto"];
+          "application/json": components["schemas"]["CustomerSearchResultDtoListResponseDto"];
+          "text/json": components["schemas"]["CustomerSearchResultDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * RegisterWalkInCustomer
+   * @description Staff registers a walk-in customer along with their vehicles. Auto-generates username and password; emails the password to the customer.
+   */
+  RegisterWalkInCustomer: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["RegisterWalkInCustomerDto"];
+        "text/json": components["schemas"]["RegisterWalkInCustomerDto"];
+        "application/*+json": components["schemas"]["RegisterWalkInCustomerDto"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["GuidResponseDto"];
+          "application/json": components["schemas"]["GuidResponseDto"];
+          "text/json": components["schemas"]["GuidResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetCustomerFullProfile
+   * @description Retrieve a customer's aggregated profile: their info, vehicles, recent invoices, and totals. Staff-only.
+   */
+  GetCustomerFullProfile: {
+    parameters: {
+      query?: {
+        recentInvoiceLimit?: number;
+      };
+      path: {
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["CustomerFullProfileDtoResponseDto"];
+          "application/json": components["schemas"]["CustomerFullProfileDtoResponseDto"];
+          "text/json": components["schemas"]["CustomerFullProfileDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
    * GetMyVehicles
    * @description Retrieve all vehicles belonging to the logged in customer.
    */
@@ -2275,6 +2415,27 @@ export type operations = {
           "text/plain": components["schemas"]["BooleanResponseDto"];
           "application/json": components["schemas"]["BooleanResponseDto"];
           "text/json": components["schemas"]["BooleanResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetVehiclesByCustomerId
+   * @description Retrieve all vehicles owned by a given customer. Staff-only.
+   */
+  GetVehiclesByCustomerId: {
+    parameters: {
+      path: {
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["VehicleDtoListResponseDto"];
+          "application/json": components["schemas"]["VehicleDtoListResponseDto"];
+          "text/json": components["schemas"]["VehicleDtoListResponseDto"];
         };
       };
     };

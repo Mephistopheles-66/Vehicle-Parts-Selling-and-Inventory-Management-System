@@ -67,4 +67,15 @@ public class VehiclesController(IVehicleService vehicleService) : ControllerBase
             "Vehicle deleted successfully.",
             true);
     }
+
+    [HttpGet("by-customer/{customerId:guid}")]
+    [Documentation("GetVehiclesByCustomerId", "Retrieve all vehicles owned by a given customer. Staff-only.")]
+    public ResponseDto<List<VehicleDto>> GetVehiclesByCustomerId([FromRoute] Guid customerId)
+    {
+        var result = vehicleService.GetVehiclesByCustomerId(customerId);
+        return new ResponseDto<List<VehicleDto>>(
+            (int)HttpStatusCode.OK,
+            "Vehicles retrieved successfully.",
+            result);
+    }
 }

@@ -102,4 +102,23 @@ export class VehiclesService {
             },
         });
     }
+    /**
+     * GetVehiclesByCustomerId
+     * Retrieve all vehicles owned by a given customer. Staff-only.
+     * @returns VehicleDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getVehiclesByCustomerId({
+        customerId,
+    }: {
+        customerId: string,
+    }): CancelablePromise<VehicleDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/vehicles/by-customer/{customerId}',
+            path: {
+                'customerId': customerId,
+            },
+        });
+    }
 }

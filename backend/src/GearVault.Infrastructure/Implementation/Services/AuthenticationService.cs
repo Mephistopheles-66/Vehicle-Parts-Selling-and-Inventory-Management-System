@@ -142,7 +142,7 @@ public class AuthenticationService(
         if (!user.IsActive)
             throw new BadRequestException("You can not log in to the system as the respective user is not active, please contact the administrator.");
 
-        var verificationCode = PasswordExtensionMethods.GeneratePassword(6, false, true, true, false);
+        var verificationCode = PasswordExtensionMethods.GeneratePassword(6, false, false, true, false);
 
         user.UpdateVerificationCode(verificationCode);
 
