@@ -6,6 +6,7 @@ import type { BooleanResponseDto } from '../models/BooleanResponseDto';
 import type { CreateSalesInvoiceDto } from '../models/CreateSalesInvoiceDto';
 import type { GuidResponseDto } from '../models/GuidResponseDto';
 import type { SalesInvoiceDtoCollectionDto } from '../models/SalesInvoiceDtoCollectionDto';
+import type { SalesInvoiceDtoListResponseDto } from '../models/SalesInvoiceDtoListResponseDto';
 import type { SalesInvoiceDtoResponseDto } from '../models/SalesInvoiceDtoResponseDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -80,6 +81,18 @@ export class SalesInvoiceService {
             path: {
                 'invoiceId': invoiceId,
             },
+        });
+    }
+    /**
+     * GetMyInvoices
+     * Retrieve all sales invoices for the currently logged in customer.
+     * @returns SalesInvoiceDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getMyInvoices(): CancelablePromise<SalesInvoiceDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/invoice/my',
         });
     }
     /**
