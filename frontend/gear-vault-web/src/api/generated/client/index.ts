@@ -76,8 +76,6 @@ export type { VendorDtoListResponseDto } from './models/VendorDtoListResponseDto
 export type { VendorDtoResponseDto } from './models/VendorDtoResponseDto';
 
 export { AppointmentsService } from './services/AppointmentsService';
-export { FinancialReportsService } from './services/FinancialReportsService';
-export type { FinancialReportDto, FinancialReportEntryDto, FinancialReportDtoResponseDto } from './services/FinancialReportsService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { PartRequestsService } from './services/PartRequestsService';
 export { PartsService } from './services/PartsService';
