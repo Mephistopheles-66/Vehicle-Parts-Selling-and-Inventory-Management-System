@@ -37,7 +37,7 @@ public class PartService(IGenericRepository genericRepository) : IPartService
             dto.Description,
             dto.Category,
             unit,
-            0,
+            dto.StockQuantity,
             dto.ReorderLevel,
             dto.SellingPrice
         );
@@ -68,6 +68,7 @@ public class PartService(IGenericRepository genericRepository) : IPartService
             dto.Description ?? part.Description,
             dto.Category ?? part.Category,
             unit,
+            dto.StockQuantity ?? part.StockQuantity,
             dto.ReorderLevel ?? part.ReorderLevel,
             dto.SellingPrice ?? part.SellingPrice,
             dto.IsActive ?? part.IsActive

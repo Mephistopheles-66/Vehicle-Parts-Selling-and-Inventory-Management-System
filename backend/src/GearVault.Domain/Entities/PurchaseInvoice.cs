@@ -45,7 +45,7 @@ public class PurchaseInvoice(
 
     public void RecalculateTotals()
     {
-        Subtotal = LineItems.Sum(li => li.Total);
+        Subtotal = LineItems.Sum(li => (decimal)li.Quantity * li.UnitPrice);
         GrandTotal = Subtotal - Discount + TaxAmount;
         BalanceDue = GrandTotal - AmountPaid;
         UpdatedAt = DateTime.Now;

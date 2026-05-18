@@ -8,6 +8,11 @@ public static class PurchaseInvoiceExtensionMethod
 {
     public static PurchaseInvoiceDto ToPurchaseInvoiceDto(this PurchaseInvoice invoice)
     {
+        // Always compute from Quantity * UnitPrice — the Total column may be stale/zero for old records
+        var subtotal = invoice.LineItems.Sum(li => (decimal)li.Quantity * li.UnitPrice);
+        var grandTotal = subtotal - invoice.Discount + invoice.TaxAmount;
+        var balanceDue = grandTotal - invoice.AmountPaid;
+
         return new PurchaseInvoiceDto
         {
             Id = invoice.Id,
@@ -17,12 +22,12 @@ public static class PurchaseInvoiceExtensionMethod
             DueDate = invoice.DueDate,
             Status = invoice.Status.ToString().ToUpper(),
             LineItems = invoice.LineItems.Select(li => li.ToLineItemDto()).ToList(),
-            Subtotal = invoice.Subtotal,
+            Subtotal = subtotal,
             Discount = invoice.Discount,
             TaxAmount = invoice.TaxAmount,
-            GrandTotal = invoice.GrandTotal,
+            GrandTotal = grandTotal,
             AmountPaid = invoice.AmountPaid,
-            BalanceDue = invoice.BalanceDue,
+            BalanceDue = balanceDue,
             CreatedAt = invoice.CreatedAt,
             UpdatedAt = invoice.UpdatedAt
         };
@@ -36,7 +41,7 @@ public static class PurchaseInvoiceExtensionMethod
             Part = lineItem.Part?.ToPartDto() ?? new(),
             Quantity = lineItem.Quantity,
             UnitPrice = lineItem.UnitPrice,
-            Total = lineItem.Total
+            Total = (decimal)lineItem.Quantity * lineItem.UnitPrice
         };
     }
 }

@@ -40,6 +40,7 @@ public class Part(
         string? description,
         string? category,
         UnitType unit,
+        int stockQuantity,
         int reorderLevel,
         decimal sellingPrice,
         bool isActive)
@@ -49,6 +50,7 @@ public class Part(
         Description = description;
         Category = category;
         Unit = unit;
+        StockQuantity = stockQuantity;
         ReorderLevel = reorderLevel;
         SellingPrice = sellingPrice;
         IsActive = isActive;
