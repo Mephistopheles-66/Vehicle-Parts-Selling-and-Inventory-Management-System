@@ -141,12 +141,9 @@ public class UserService(
 
     public List<CustomerSearchResultDto> SearchCustomers(string searchTerm, int limit = 20)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            throw new BadRequestException("Search term cannot be empty.");
-
         if (limit <= 0 || limit > 100) limit = 20;
 
-        var term = searchTerm.Trim().ToLower();
+        var term = searchTerm?.Trim().ToLower() ?? string.Empty;
         var customerRoleId = Guid.Parse(Constants.Roles.Customer.Id);
 
         // Try parsing as a Guid — supports search by customer ID.
@@ -157,6 +154,7 @@ public class UserService(
             u =>
                 u.RoleId == customerRoleId &&
                 (
+                    string.IsNullOrWhiteSpace(term) ||
                     (idMatch != null && u.Id == idMatch) ||
                     u.Name.ToLower().Contains(term) ||
                     u.PhoneNumber.ToLower().Contains(term) ||
@@ -165,10 +163,12 @@ public class UserService(
         ).Take(limit).ToList();
 
         // Step 2: find vehicles whose number matches; collect their owner user IDs.
-        var vehicleMatches = genericRepository.Get<Vehicle>(
-            v => v.VehicleNumber.ToLower().Contains(term)
-                 || v.LicenseNumber.ToLower().Contains(term)
-        ).Take(limit).ToList();
+        var vehicleMatches = string.IsNullOrWhiteSpace(term)
+            ? new List<Vehicle>()
+            : genericRepository.Get<Vehicle>(
+                v => v.VehicleNumber.ToLower().Contains(term)
+                     || v.LicenseNumber.ToLower().Contains(term)
+            ).Take(limit).ToList();
 
         var matchedCustomerIds = vehicleMatches
             .Select(v => v.UserId)
@@ -551,5 +551,97 @@ public class UserService(
             LifetimeSpend = lifetimeSpend,
             OutstandingBalance = outstandingBalance
         };
+    }
+
+    public List<CustomerReportDto> GetRegularCustomerReports(int limit = 20)
+    {
+        return BuildCustomerReports(limit)
+            .OrderByDescending(x => x.InvoiceCount)
+            .ThenByDescending(x => x.LastPurchaseAt)
+            .Take(NormalizeReportLimit(limit))
+            .ToList();
+    }
+
+    public List<CustomerReportDto> GetHighSpenderReports(int limit = 20)
+    {
+        return BuildCustomerReports(limit)
+            .OrderByDescending(x => x.TotalSpent)
+            .ThenByDescending(x => x.LastPurchaseAt)
+            .Take(NormalizeReportLimit(limit))
+            .ToList();
+    }
+
+    public List<CustomerReportDto> GetPendingCreditReports(int limit = 20)
+    {
+        return BuildCustomerReports(limit)
+            .Where(x => x.PendingCredit > 0)
+            .OrderByDescending(x => x.PendingCredit)
+            .ThenByDescending(x => x.LastPurchaseAt)
+            .Take(NormalizeReportLimit(limit))
+            .ToList();
+    }
+
+    private static int NormalizeReportLimit(int limit)
+    {
+        return limit <= 0 || limit > 100 ? 20 : limit;
+    }
+
+    private List<CustomerReportDto> BuildCustomerReports(int limit)
+    {
+        _ = NormalizeReportLimit(limit);
+
+        var customerRoleId = Guid.Parse(Constants.Roles.Customer.Id);
+        var customers = genericRepository.Get<User>(
+            u => u.RoleId == customerRoleId,
+            asNoTracking: true).ToList();
+
+        if (customers.Count == 0) return new List<CustomerReportDto>();
+
+        var customerIds = customers.Select(c => c.Id).ToHashSet();
+        var vehicles = genericRepository.Get<Vehicle>(
+            v => customerIds.Contains(v.UserId),
+            asNoTracking: true).ToList();
+
+        var vehiclesByCustomer = vehicles
+            .GroupBy(v => v.UserId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var vehicleIds = vehicles.Select(v => v.Id).ToHashSet();
+        var invoices = vehicleIds.Count > 0
+            ? genericRepository.Get<SalesInvoice>(
+                i => vehicleIds.Contains(i.VehicleId),
+                asNoTracking: true).ToList()
+            : new List<SalesInvoice>();
+
+        var invoicesByVehicle = invoices
+            .GroupBy(i => i.VehicleId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var role = genericRepository.GetById<Role>(customerRoleId);
+
+        return customers
+            .Select(customer =>
+            {
+                customer.Role = role;
+
+                var customerVehicles = vehiclesByCustomer.GetValueOrDefault(customer.Id) ?? new List<Vehicle>();
+                var customerInvoices = customerVehicles
+                    .SelectMany(vehicle => invoicesByVehicle.GetValueOrDefault(vehicle.Id) ?? new List<SalesInvoice>())
+                    .ToList();
+
+                return new CustomerReportDto
+                {
+                    Customer = customer.ToUserDto(),
+                    VehicleCount = customerVehicles.Count,
+                    InvoiceCount = customerInvoices.Count,
+                    TotalSpent = customerInvoices.Sum(i => i.TotalAmount),
+                    PendingCredit = customerInvoices
+                        .Where(i => i.PaymentStatus != PaymentStatus.Paid)
+                        .Sum(i => i.BalanceDue),
+                    LastPurchaseAt = customerInvoices.Count == 0 ? null : customerInvoices.Max(i => i.CreatedAt)
+                };
+            })
+            .Where(report => report.InvoiceCount > 0 || report.VehicleCount > 0)
+            .ToList();
     }
 }

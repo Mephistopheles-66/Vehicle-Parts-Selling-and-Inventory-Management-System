@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { BooleanResponseDto } from '../models/BooleanResponseDto';
 import type { CustomerFullProfileDtoResponseDto } from '../models/CustomerFullProfileDtoResponseDto';
+import type { CustomerReportDtoListResponseDto } from '../models/CustomerReportDtoListResponseDto';
 import type { CustomerSearchResultDtoListResponseDto } from '../models/CustomerSearchResultDtoListResponseDto';
 import type { GuidResponseDto } from '../models/GuidResponseDto';
 import type { RegisterWalkInCustomerDto } from '../models/RegisterWalkInCustomerDto';
@@ -264,6 +265,63 @@ export class UserService {
             },
             query: {
                 'recentInvoiceLimit': recentInvoiceLimit,
+            },
+        });
+    }
+    /**
+     * GetRegularCustomerReports
+     * Retrieve regular customers ranked by purchase frequency.
+     * @returns CustomerReportDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getRegularCustomerReports({
+        limit = 20,
+    }: {
+        limit?: number,
+    }): CancelablePromise<CustomerReportDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/customers/reports/regulars',
+            query: {
+                'limit': limit,
+            },
+        });
+    }
+    /**
+     * GetHighSpenderReports
+     * Retrieve customers ranked by lifetime spending.
+     * @returns CustomerReportDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getHighSpenderReports({
+        limit = 20,
+    }: {
+        limit?: number,
+    }): CancelablePromise<CustomerReportDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/customers/reports/high-spenders',
+            query: {
+                'limit': limit,
+            },
+        });
+    }
+    /**
+     * GetPendingCreditReports
+     * Retrieve customers with pending credit balances.
+     * @returns CustomerReportDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getPendingCreditReports({
+        limit = 20,
+    }: {
+        limit?: number,
+    }): CancelablePromise<CustomerReportDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/customers/reports/pending-credits',
+            query: {
+                'limit': limit,
             },
         });
     }

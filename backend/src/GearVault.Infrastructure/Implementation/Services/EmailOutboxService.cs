@@ -274,6 +274,25 @@ public class EmailOutboxService(
 
                     break;
                 }
+                case EmailProcess.SalesInvoiceCreated:
+                case EmailProcess.CreditReminder:
+                {
+                    var invoicePayload =
+                        JsonSerializer.Deserialize<SalesInvoiceEmailPayloadDto>(emailOutbox.PayloadJson);
+
+                    if (invoicePayload != null)
+                    {
+                        emailModel.Name = invoicePayload.UserName;
+                        emailModel.InvoiceNumber = invoicePayload.InvoiceNumber;
+                        emailModel.InvoiceDate = invoicePayload.CreatedAt;
+                        emailModel.SubTotal = invoicePayload.SubTotal;
+                        emailModel.DiscountAmount = invoicePayload.DiscountAmount;
+                        emailModel.TotalAmount = invoicePayload.TotalAmount;
+                        emailModel.BalanceDue = invoicePayload.BalanceDue;
+                    }
+
+                    break;
+                }
                 default:
                     throw new NotSupportedException($"Email process '{emailOutbox.Process}' is not supported in the outbox handler.");
             }

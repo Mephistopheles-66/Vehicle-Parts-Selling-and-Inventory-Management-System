@@ -1,4 +1,6 @@
 using System.Text;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using GearVault.Domain.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
@@ -112,6 +114,11 @@ public static class InfrastructureServices
 
         #region Registration of Background Hosted Services
         services.AddHostedService<EmailOutboxService>();
+        #endregion
+
+        #region Hangfire Configuration
+        services.AddHangfire(config => config.UseMemoryStorage());
+        services.AddHangfireServer();
         #endregion
 
         #region Registration of Email Outbox Service

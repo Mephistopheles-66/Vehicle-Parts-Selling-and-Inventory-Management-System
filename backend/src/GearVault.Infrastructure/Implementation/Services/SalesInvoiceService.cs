@@ -3,6 +3,7 @@ using GearVault.Domain.Entities;
 using GearVault.Domain.Common.Enum;
 using GearVault.Application.Common.User;
 using GearVault.Application.Exceptions;
+using GearVault.Application.DTOs.Emails;
 using GearVault.Application.DTOs.SalesInvoices;
 using GearVault.Application.Interfaces.Services;
 using GearVault.Application.Interfaces.Repositories;
@@ -140,8 +141,22 @@ public class SalesInvoiceService(
         foreach (var requestedItem in dto.Items)
         {
             var part = parts[requestedItem.PartId];
+            var previousStockQuantity = part.StockQuantity;
             part.AdjustStock(-requestedItem.Quantity);
             genericRepository.Update(part);
+
+            if (previousStockQuantity >= 10 && part.StockQuantity < 10)
+            {
+                var notification = new AdminNotification(
+                    AdminNotificationType.LowStock,
+                    "Low stock alert",
+                    $"Part '{part.Name}' is low on stock. Remaining quantity: {part.StockQuantity}.",
+                    partId: part.Id,
+                    userId: user.Id,
+                    salesInvoiceId: invoice.Id);
+
+                genericRepository.Insert(notification);
+            }
         }
 
         // 8. Queue email if requested and user has an email address.
@@ -265,7 +280,7 @@ public class SalesInvoiceService(
     {
         if (string.IsNullOrWhiteSpace(user.EmailAddress)) return;
 
-        var payload = new
+        var payload = new SalesInvoiceEmailPayloadDto
         {
             InvoiceId = invoice.Id,
             InvoiceNumber = invoice.InvoiceNumber,
@@ -273,6 +288,7 @@ public class SalesInvoiceService(
             SubTotal = invoice.SubTotal,
             DiscountAmount = invoice.DiscountAmount,
             TotalAmount = invoice.TotalAmount,
+            BalanceDue = invoice.BalanceDue,
             CreatedAt = invoice.CreatedAt
         };
 

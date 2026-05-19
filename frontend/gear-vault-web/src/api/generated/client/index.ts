@@ -9,6 +9,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { AccountConfirmationDto } from './models/AccountConfirmationDto';
 export type { AccountVerificationDto } from './models/AccountVerificationDto';
+export type { AdminNotificationDto } from './models/AdminNotificationDto';
+export type { AdminNotificationDtoListResponseDto } from './models/AdminNotificationDtoListResponseDto';
 export type { AppointmentDto } from './models/AppointmentDto';
 export type { AppointmentDtoListResponseDto } from './models/AppointmentDtoListResponseDto';
 export type { AppointmentDtoResponseDto } from './models/AppointmentDtoResponseDto';
@@ -28,6 +30,8 @@ export type { CreateVendorDto } from './models/CreateVendorDto';
 export type { CreateWalkInVehicleDto } from './models/CreateWalkInVehicleDto';
 export type { CustomerFullProfileDto } from './models/CustomerFullProfileDto';
 export type { CustomerFullProfileDtoResponseDto } from './models/CustomerFullProfileDtoResponseDto';
+export type { CustomerReportDto } from './models/CustomerReportDto';
+export type { CustomerReportDtoListResponseDto } from './models/CustomerReportDtoListResponseDto';
 export type { CustomerSearchResultDto } from './models/CustomerSearchResultDto';
 export type { CustomerSearchResultDtoListResponseDto } from './models/CustomerSearchResultDtoListResponseDto';
 export type { FuelType } from './models/FuelType';
@@ -83,6 +87,7 @@ export type { VendorDtoListResponseDto } from './models/VendorDtoListResponseDto
 export type { VendorDtoResponseDto } from './models/VendorDtoResponseDto';
 
 export { AppointmentsService } from './services/AppointmentsService';
+export { AdminNotificationsService } from './services/AdminNotificationsService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { PartRequestsService } from './services/PartRequestsService';
 export { PartsService } from './services/PartsService';

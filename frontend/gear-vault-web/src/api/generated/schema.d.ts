@@ -365,6 +365,27 @@ export type paths = {
      */
     get: operations["GetCustomerFullProfile"];
   };
+  "/api/v1/user/customers/reports/regulars": {
+    /**
+     * GetRegularCustomerReports
+     * @description Retrieve regular customers ranked by purchase frequency.
+     */
+    get: operations["GetRegularCustomerReports"];
+  };
+  "/api/v1/user/customers/reports/high-spenders": {
+    /**
+     * GetHighSpenderReports
+     * @description Retrieve customers ranked by lifetime spending.
+     */
+    get: operations["GetHighSpenderReports"];
+  };
+  "/api/v1/user/customers/reports/pending-credits": {
+    /**
+     * GetPendingCreditReports
+     * @description Retrieve customers with pending credit balances.
+     */
+    get: operations["GetPendingCreditReports"];
+  };
   "/api/vehicles": {
     /**
      * GetMyVehicles
@@ -606,6 +627,25 @@ export type components = {
       statusCode?: number;
       message?: string | null;
       result?: components["schemas"]["CustomerFullProfileDto"];
+    };
+    CustomerReportDto: {
+      customer?: components["schemas"]["UserDto"];
+      /** Format: int32 */
+      vehicleCount?: number;
+      /** Format: int32 */
+      invoiceCount?: number;
+      /** Format: double */
+      totalSpent?: number;
+      /** Format: double */
+      pendingCredit?: number;
+      /** Format: date-time */
+      lastPurchaseAt?: string | null;
+    };
+    CustomerReportDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["CustomerReportDto"][] | null;
     };
     CustomerSearchResultDto: {
       customer?: components["schemas"]["UserDto"];
@@ -2339,6 +2379,69 @@ export type operations = {
           "text/plain": components["schemas"]["CustomerFullProfileDtoResponseDto"];
           "application/json": components["schemas"]["CustomerFullProfileDtoResponseDto"];
           "text/json": components["schemas"]["CustomerFullProfileDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetRegularCustomerReports
+   * @description Retrieve regular customers ranked by purchase frequency.
+   */
+  GetRegularCustomerReports: {
+    parameters: {
+      query?: {
+        limit?: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "application/json": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "text/json": components["schemas"]["CustomerReportDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetHighSpenderReports
+   * @description Retrieve customers ranked by lifetime spending.
+   */
+  GetHighSpenderReports: {
+    parameters: {
+      query?: {
+        limit?: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "application/json": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "text/json": components["schemas"]["CustomerReportDtoListResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetPendingCreditReports
+   * @description Retrieve customers with pending credit balances.
+   */
+  GetPendingCreditReports: {
+    parameters: {
+      query?: {
+        limit?: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "application/json": components["schemas"]["CustomerReportDtoListResponseDto"];
+          "text/json": components["schemas"]["CustomerReportDtoListResponseDto"];
         };
       };
     };

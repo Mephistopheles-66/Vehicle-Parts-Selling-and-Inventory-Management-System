@@ -1,9 +1,11 @@
 using Microsoft.Net.Http.Headers;
+using Hangfire;
 using GearVault.API.Middleware;
 using System.IdentityModel.Tokens.Jwt;
 using GearVault.Infrastructure.Dependency;
 using GearVault.API.Configurations.Application;
 using GearVault.Domain.Common;
+using GearVault.Application.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,13 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 app.AddCustomSwaggerInterface();
 
 app.AddCustomScalarInterface();
+
+app.UseHangfireDashboard("/hangfire");
+
+RecurringJob.AddOrUpdate<ICreditReminderJob>(
+    "overdue-credit-reminders",
+    job => job.QueueOverdueCreditReminders(),
+    Cron.Daily);
 
 app.UseRouting();
 
