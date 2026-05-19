@@ -1,20 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <title>Sales Invoice Created</title>
 </head>
-<body style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
-    <p>Hi {{Name}},</p>
-    <p>Your GearVault sales invoice <strong>{{InvoiceNumber}}</strong> has been created.</p>
-    <table style="border-collapse: collapse; width: 100%; max-width: 520px;">
-        <tr><td style="padding: 6px 0;">Invoice date</td><td style="padding: 6px 0; text-align: right;">{{InvoiceDate}}</td></tr>
-        <tr><td style="padding: 6px 0;">Subtotal</td><td style="padding: 6px 0; text-align: right;">Rs. {{SubTotal}}</td></tr>
-        <tr><td style="padding: 6px 0;">Discount</td><td style="padding: 6px 0; text-align: right;">Rs. {{DiscountAmount}}</td></tr>
-        <tr><td style="padding: 6px 0; font-weight: bold;">Total</td><td style="padding: 6px 0; text-align: right; font-weight: bold;">Rs. {{TotalAmount}}</td></tr>
-        <tr><td style="padding: 6px 0;">Balance due</td><td style="padding: 6px 0; text-align: right;">Rs. {{BalanceDue}}</td></tr>
-    </table>
-    <p>Thank you for choosing GearVault.</p>
-    <p style="color: #6b7280; font-size: 12px;">&copy; {{CurrentYear}} GearVault</p>
+<body style="margin:0;padding:0;background-color:#f9fafb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 12px;background-color:#f9fafb;">
+    <tr>
+        <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;box-shadow:0 10px 24px rgba(13,27,42,0.08);">
+                <tr>
+                    <td style="background-color:#0d1b2a;padding:28px 32px;">
+                        <div style="font-size:22px;font-weight:700;color:#ffffff;line-height:1;">Gear Vault</div>
+                        <div style="margin-top:7px;color:#cbd5e1;font-size:12px;letter-spacing:3px;text-transform:uppercase;">Parts Vault</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:34px 32px 30px;">
+                        <p style="margin:0 0 10px;color:#1e3a5f;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Sales invoice</p>
+                        <h1 style="margin:0 0 14px;color:#1f2937;font-size:24px;line-height:1.25;">Hello {{Name}},</h1>
+                        <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.7;">
+                            Your Gear Vault sales invoice <strong style="color:#1f2937;">{{InvoiceNumber}}</strong> has been created.
+                        </p>
+
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+                            <tr>
+                                <td style="padding:14px 18px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;width:42%;">Invoice date</td>
+                                <td style="padding:14px 18px;color:#1f2937;font-size:14px;font-weight:700;border-bottom:1px solid #e5e7eb;text-align:right;">{{InvoiceDate}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:14px 18px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Subtotal</td>
+                                <td style="padding:14px 18px;color:#1f2937;font-size:14px;font-weight:700;border-bottom:1px solid #e5e7eb;text-align:right;">Rs. {{SubTotal}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:14px 18px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Discount</td>
+                                <td style="padding:14px 18px;color:#10b981;font-size:14px;font-weight:700;border-bottom:1px solid #e5e7eb;text-align:right;">Rs. {{DiscountAmount}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:14px 18px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Total</td>
+                                <td style="padding:14px 18px;color:#1e3a5f;font-size:16px;font-weight:700;border-bottom:1px solid #e5e7eb;text-align:right;">Rs. {{TotalAmount}}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:14px 18px;color:#6b7280;font-size:13px;">Balance due</td>
+                                <td style="padding:14px 18px;color:#1f2937;font-size:14px;font-weight:700;text-align:right;">Rs. {{BalanceDue}}</td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:22px 0 0;color:#6b7280;font-size:14px;line-height:1.7;">
+                            Thank you for choosing Gear Vault.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color:#f9fafb;padding:18px 32px;border-top:1px solid #e5e7eb;">
+                        <p style="margin:0;color:#6b7280;font-size:12px;line-height:1.6;">
+                            &copy; {{CurrentYear}} Gear Vault. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
