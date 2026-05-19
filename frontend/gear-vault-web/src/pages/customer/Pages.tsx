@@ -7,48 +7,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { formatRs } from '@/lib/format';
-import { Building2, Download, Loader2, Mail, MapPin, Package, Phone, Star, X } from 'lucide-react';
+import { Download, Loader2, Package, Star, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppointmentsService, PartRequestsService, PartsService, ReviewsService, SalesInvoiceService, VehiclesService } from '@/api/generated/client';
 import { getApiErrorMessage, unwrapApiResult } from '@/api/client';
 import { toast } from 'sonner';
-
-// ─── Service Center ──────────────────────────────────────────────────────────
-
-export const ServiceCenter = () => (
-  <div>
-    <PageHeader title="Service Center" description="About Gear Vault." />
-    <div className="p-6 lg:p-8 grid lg:grid-cols-3 gap-5">
-      <Card className="lg:col-span-2"><CardContent className="p-6">
-        <h2 className="text-xl font-bold text-charcoal">Gear Vault Service Center</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">A full-service automotive workshop and parts retailer. We specialize in OEM-grade replacements, preventive maintenance, and AI-driven diagnostics.</p>
-        <div className="mt-5 grid sm:grid-cols-2 gap-3 text-sm">
-          {['Engine diagnostics & service','Brake system overhaul','Tire rotation & alignment','Battery & electrical','AC service','Oil & lubricants'].map(s => (
-            <div key={s} className="flex items-center gap-2 p-3 rounded-md bg-canvas border">
-              <div className="h-2 w-2 rounded-full bg-primary" />{s}
-            </div>
-          ))}
-        </div>
-        <div className="mt-6 aspect-[16/7] rounded-lg bg-deep-navy flex items-center justify-center text-white/40 text-sm"><MapPin className="h-5 w-5 mr-2" />Map placeholder · Kathmandu, Nepal</div>
-      </CardContent></Card>
-      <Card><CardContent className="p-6 space-y-4 text-sm">
-        <div className="flex items-center gap-3"><Building2 className="h-4 w-4 text-primary" /><div><div className="text-xs text-muted-foreground">Location</div><div className="font-medium">Balaju, Kathmandu</div></div></div>
-        <div className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /><div><div className="text-xs text-muted-foreground">Phone</div><div className="font-mono">+977 014441111</div></div></div>
-        <div className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /><div><div className="text-xs text-muted-foreground">Email</div><div>hello@gearvault.com</div></div></div>
-        <div className="border-t pt-4">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Hours</div>
-          <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between"><span>Mon – Fri</span><span className="tabular">8:00 – 19:00</span></div>
-            <div className="flex justify-between"><span>Saturday</span><span className="tabular">9:00 – 17:00</span></div>
-            <div className="flex justify-between"><span>Sunday</span><span className="text-muted-foreground">Closed</span></div>
-          </div>
-        </div>
-      </CardContent></Card>
-    </div>
-  </div>
-);
 
 // ─── Book Appointment ─────────────────────────────────────────────────────────
 

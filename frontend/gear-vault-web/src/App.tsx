@@ -44,8 +44,7 @@ import PartRequests from "./pages/staff/PartRequests";
 import CustomerDashboard from "./pages/customer/Dashboard";
 import Profile from "./pages/customer/Profile";
 import MyVehicles from "./pages/customer/MyVehicles";
-import VehicleHealth from "./pages/customer/VehicleHealth";
-import { ServiceCenter, BookAppointment, MyAppointments, BrowseParts, RequestPart, PurchaseHistory, MyInvoices, Reviews } from "./pages/customer/Pages";
+import { BookAppointment, MyAppointments, BrowseParts, RequestPart, PurchaseHistory, MyInvoices, Reviews } from "./pages/customer/Pages";
 
 const queryClient = new QueryClient();
 
@@ -103,8 +102,6 @@ const App = () => (
               <Route path="/customer" element={<CustomerDashboard />} />
               <Route path="/customer/profile" element={<Profile />} />
               <Route path="/customer/vehicles" element={<MyVehicles />} />
-              <Route path="/customer/health" element={<VehicleHealth />} />
-              <Route path="/customer/service-center" element={<ServiceCenter />} />
               <Route path="/customer/book" element={<BookAppointment />} />
               <Route path="/customer/appointments" element={<MyAppointments />} />
               <Route path="/customer/parts" element={<BrowseParts />} />

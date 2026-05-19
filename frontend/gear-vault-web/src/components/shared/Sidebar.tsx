@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Truck, FileText, Users,
   BarChart3, AlertTriangle, Calendar, MessageSquare, Wrench,
-  Car, Sparkles, Receipt, Star, Search, History, UserCog, Building2, Mail, Settings
+  Car, Receipt, Star, History, UserCog, Building2
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Role } from '@/types';
@@ -51,12 +51,10 @@ const customerNav: NavGroup[] = [
   { label: 'My Garage', items: [
     { to: '/customer', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/customer/vehicles', label: 'My Vehicles', icon: Car },
-    { to: '/customer/health', label: 'Vehicle Health', icon: Sparkles },
   ]},
   { label: 'Service', items: [
     { to: '/customer/appointments', label: 'Appointments', icon: Calendar },
     { to: '/customer/book', label: 'Book Appointment', icon: Wrench },
-    { to: '/customer/service-center', label: 'Service Center', icon: Building2 },
   ]},
   { label: 'Shop', items: [
     { to: '/customer/parts', label: 'Browse Parts', icon: Package },
