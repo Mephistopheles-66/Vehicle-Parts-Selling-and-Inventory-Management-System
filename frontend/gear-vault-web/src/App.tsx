@@ -26,7 +26,6 @@ import VendorDetails from "./pages/admin/VendorDetails";
 import PurchaseInvoicesList from "./pages/admin/PurchaseInvoicesList";
 import PurchaseInvoiceForm from "./pages/admin/PurchaseInvoiceForm";
 import UsersList from "./pages/admin/UsersList";
-import RolesList from "./pages/admin/RolesList";
 import Reports from "./pages/admin/Reports";
 import LowStock from "./pages/admin/LowStock";
 import OverdueCredits from "./pages/admin/OverdueCredits";
@@ -81,9 +80,7 @@ const App = () => (
               <Route path="/admin/purchase-invoices/:id" element={<PurchaseInvoiceForm />} />
               <Route path="/admin/users" element={<UsersList />} />
               <Route path="/admin/users/new" element={<UsersList />} />
-              <Route path="/admin/roles" element={<RolesList />} />
               <Route path="/admin/reports" element={<Reports />} />
-              <Route path="/admin/inventory-report" element={<Reports />} />
               <Route path="/admin/low-stock" element={<LowStock />} />
               <Route path="/admin/overdue-credits" element={<OverdueCredits />} />
             </Route>

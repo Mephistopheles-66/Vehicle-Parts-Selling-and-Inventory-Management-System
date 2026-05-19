@@ -51,26 +51,27 @@ public class PurchaseInvoiceService(IGenericRepository genericRepository) : IPur
             dto.AmountPaid
         );
 
-        genericRepository.Insert(invoice);
-
-        var lineItems = new List<PurchaseInvoiceLineItem>();
+        // Assign ID upfront so line items get the correct FK
+        invoice.AssignIdentifier(Guid.NewGuid());
 
         foreach (var li in dto.LineItems)
         {
             if (!genericRepository.Exists<Part>(p => p.Id == li.PartId))
                 throw new BadRequestException($"Part with ID {li.PartId} not found.");
 
-            var lineItem = new PurchaseInvoiceLineItem(
+            invoice.LineItems.Add(new PurchaseInvoiceLineItem(
                 invoice.Id,
                 li.PartId,
                 li.Quantity,
                 li.UnitPrice
-            );
-
-            lineItems.Add(lineItem);
+            ));
         }
 
-        genericRepository.AddMultipleEntity(lineItems);
+        // Calculate totals before persisting
+        invoice.RecalculateTotals();
+
+        // Single insert — EF Core cascades the line items
+        genericRepository.Insert(invoice);
 
         return GetPurchaseInvoiceById(invoice.Id);
     }
@@ -94,6 +95,7 @@ public class PurchaseInvoiceService(IGenericRepository genericRepository) : IPur
             genericRepository.Update(part);
         }
 
+        invoice.RecalculateTotals();
         invoice.Post();
         genericRepository.Update(invoice);
 

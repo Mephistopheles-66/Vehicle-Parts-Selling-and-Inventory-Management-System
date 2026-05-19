@@ -1,18 +1,20 @@
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, AlertTriangle, Clock, Users } from 'lucide-react';
-import { revenueSeries, topPartsSeries, recentActivity, parts, customers, salesInvoices } from '@/data/mock';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from 'recharts';
-import { formatRs } from '@/lib/format';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { DollarSign, AlertTriangle, Package, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { PartsService, UserService } from '@/api/generated/client';
+import { formatRs } from '@/lib/format';
 
 const AdminDashboard = () => {
-  const lowStock = parts.filter(p => p.stock < 10).length;
-  const pendingCredits = customers.reduce((s, c) => s + c.pendingCredit, 0);
-  const revenue = salesInvoices.reduce((s, i) => s + i.total, 0);
+  const { data: partsRes } = useQuery({ queryKey: ['parts'], queryFn: () => PartsService.getAllParts() });
+  const { data: usersRes } = useQuery({ queryKey: ['users'], queryFn: () => UserService.getAllUsersList({}) });
+
+  const parts = partsRes?.result ?? [];
+  const users = usersRes?.result ?? [];
+  const lowStock = parts.filter(p => (p.stockQuantity ?? 0) < (p.reorderLevel ?? 10)).length;
 
   return (
     <div>
@@ -23,75 +25,55 @@ const AdminDashboard = () => {
       />
       <div className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <KpiCard label="Revenue (this month)" value={formatRs(845000)} delta={20.4} icon={DollarSign} accent="success" />
-          <KpiCard label="Low stock items" value={String(lowStock)} delta={-12} icon={AlertTriangle} accent="warning" />
-          <KpiCard label="Pending credits" value={formatRs(pendingCredits)} delta={3.1} icon={Clock} accent="danger" />
-          <KpiCard label="Total customers" value={String(customers.length * 80)} delta={8.5} icon={Users} accent="navy" />
+          <KpiCard label="Total parts" value={String(parts.length)} icon={Package} accent="success" />
+          <KpiCard label="Low stock items" value={String(lowStock)} icon={AlertTriangle} accent="warning" />
+          <KpiCard label="Total users" value={String(users.length)} icon={Users} accent="navy" />
+          <KpiCard label="Stock value" value={formatRs(parts.reduce((s, p) => s + (p.sellingPrice ?? 0) * (p.stockQuantity ?? 0), 0))} icon={DollarSign} accent="danger" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Revenue vs Purchases</CardTitle>
-              <span className="text-xs text-muted-foreground">Last 6 months</span>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer>
-                <AreaChart data={revenueSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="pur" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#9CA3AF" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#9CA3AF" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => (v/1000)+'k'} />
-                  <Tooltip contentStyle={{ background: '#0D1B2A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }} formatter={(v: number) => formatRs(v)} />
-                  <Area type="monotone" dataKey="purchases" stroke="#9CA3AF" strokeWidth={2} fill="url(#pur)" />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#rev)" />
-                </AreaChart>
-              </ResponsiveContainer>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Card>
+            <CardHeader><CardTitle className="text-base">Low stock items</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead className="bg-deep-navy text-white">
+                  <tr>{['Part', 'Stock', 'Reorder Level'].map(h => <th key={h} className="px-4 py-3 text-left text-xs uppercase tracking-wider">{h}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {parts.filter(p => (p.stockQuantity ?? 0) < (p.reorderLevel ?? 10)).slice(0, 5).map((p, i) => (
+                    <tr key={p.id} className={`border-b ${i % 2 ? 'bg-canvas' : ''}`}>
+                      <td className="px-4 py-3 font-medium">{p.name}</td>
+                      <td className="px-4 py-3 tabular text-destructive font-bold">{p.stockQuantity}</td>
+                      <td className="px-4 py-3 tabular text-muted-foreground">{p.reorderLevel}</td>
+                    </tr>
+                  ))}
+                  {lowStock === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">No low stock items.</td></tr>}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Top-selling parts</CardTitle></CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer>
-                <BarChart data={topPartsSeries} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" stroke="#9CA3AF" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="name" stroke="#9CA3AF" fontSize={11} tickLine={false} axisLine={false} width={75} />
-                  <Tooltip contentStyle={{ background: '#0D1B2A', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }} />
-                  <Bar dataKey="units" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardHeader><CardTitle className="text-base">Recent users</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead className="bg-deep-navy text-white">
+                  <tr>{['Name', 'Email', 'Role'].map(h => <th key={h} className="px-4 py-3 text-left text-xs uppercase tracking-wider">{h}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {users.slice(0, 5).map((u, i) => (
+                    <tr key={u.id} className={`border-b ${i % 2 ? 'bg-canvas' : ''}`}>
+                      <td className="px-4 py-3 font-medium">{u.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{u.emailAddress}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{u.role?.name ?? '-'}</td>
+                    </tr>
+                  ))}
+                  {users.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">No users found.</td></tr>}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
         </div>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Recent activity</CardTitle></CardHeader>
-          <CardContent>
-            <ul className="divide-y">
-              {recentActivity.map(a => (
-                <li key={a.id} className="py-3 flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-3">
-                    <StatusBadge variant={a.who === 'System' ? 'warning' : 'info'}>{a.who}</StatusBadge>
-                    <span className="text-charcoal">{a.action}</span>
-                    <span className="text-muted-foreground">— {a.target}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{a.when}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
