@@ -2245,6 +2245,38 @@
         }
       }
     },
+    "/api/v1/sales/invoice/my": {
+      "get": {
+        "tags": [
+          "SalesInvoice"
+        ],
+        "summary": "GetMyInvoices",
+        "description": "Retrieve all sales invoices for the currently logged in customer.",
+        "operationId": "GetMyInvoices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sales/invoice/{invoiceId}/send-email": {
       "post": {
         "tags": [
@@ -3664,6 +3696,10 @@
             "type": "string",
             "nullable": true
           },
+          "stockQuantity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "reorderLevel": {
             "type": "integer",
             "format": "int32"
@@ -4772,6 +4808,27 @@
         },
         "additionalProperties": false
       },
+      "SalesInvoiceDtoListResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesInvoiceDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "SalesInvoiceDtoResponseDto": {
         "type": "object",
         "properties": {
@@ -4872,6 +4929,11 @@
           },
           "unit": {
             "type": "string",
+            "nullable": true
+          },
+          "stockQuantity": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "reorderLevel": {

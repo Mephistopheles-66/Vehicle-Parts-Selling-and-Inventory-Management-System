@@ -292,6 +292,13 @@ export type paths = {
      */
     get: operations["GetInvoiceById"];
   };
+  "/api/v1/sales/invoice/my": {
+    /**
+     * GetMyInvoices
+     * @description Retrieve all sales invoices for the currently logged in customer.
+     */
+    get: operations["GetMyInvoices"];
+  };
   "/api/v1/sales/invoice/{invoiceId}/send-email": {
     /**
      * SendInvoiceEmail
@@ -499,6 +506,8 @@ export type components = {
       description?: string | null;
       category?: string | null;
       unit?: string | null;
+      /** Format: int32 */
+      stockQuantity?: number;
       /** Format: int32 */
       reorderLevel?: number;
       /** Format: double */
@@ -879,6 +888,12 @@ export type components = {
       displayCount?: number;
       result?: (readonly components["schemas"]["SalesInvoiceDto"][]) | null;
     };
+    SalesInvoiceDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["SalesInvoiceDto"][] | null;
+    };
     SalesInvoiceDtoResponseDto: {
       /** Format: int32 */
       statusCode?: number;
@@ -915,6 +930,8 @@ export type components = {
       description?: string | null;
       category?: string | null;
       unit?: string | null;
+      /** Format: int32 */
+      stockQuantity?: number | null;
       /** Format: int32 */
       reorderLevel?: number | null;
       /** Format: double */
@@ -2044,6 +2061,22 @@ export type operations = {
           "text/plain": components["schemas"]["SalesInvoiceDtoResponseDto"];
           "application/json": components["schemas"]["SalesInvoiceDtoResponseDto"];
           "text/json": components["schemas"]["SalesInvoiceDtoResponseDto"];
+        };
+      };
+    };
+  };
+  /**
+   * GetMyInvoices
+   * @description Retrieve all sales invoices for the currently logged in customer.
+   */
+  GetMyInvoices: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["SalesInvoiceDtoListResponseDto"];
+          "application/json": components["schemas"]["SalesInvoiceDtoListResponseDto"];
+          "text/json": components["schemas"]["SalesInvoiceDtoListResponseDto"];
         };
       };
     };

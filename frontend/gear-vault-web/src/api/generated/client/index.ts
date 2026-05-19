@@ -60,6 +60,7 @@ export type { RoleDtoListResponseDto } from './models/RoleDtoListResponseDto';
 export type { RoleDtoResponseDto } from './models/RoleDtoResponseDto';
 export type { SalesInvoiceDto } from './models/SalesInvoiceDto';
 export type { SalesInvoiceDtoCollectionDto } from './models/SalesInvoiceDtoCollectionDto';
+export type { SalesInvoiceDtoListResponseDto } from './models/SalesInvoiceDtoListResponseDto';
 export type { SalesInvoiceDtoResponseDto } from './models/SalesInvoiceDtoResponseDto';
 export type { SalesInvoiceItemDto } from './models/SalesInvoiceItemDto';
 export type { TokenDto } from './models/TokenDto';

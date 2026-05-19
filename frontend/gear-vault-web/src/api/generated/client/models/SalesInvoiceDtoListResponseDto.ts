@@ -8,3 +8,4 @@ export type SalesInvoiceDtoListResponseDto = {
     message?: string | null;
     result?: Array<SalesInvoiceDto> | null;
 };
+
