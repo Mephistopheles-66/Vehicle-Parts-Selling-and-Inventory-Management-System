@@ -6,6 +6,38 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/admin/notifications/low-stock": {
+      "get": {
+        "tags": [
+          "AdminNotifications"
+        ],
+        "summary": "GetLowStockNotifications",
+        "description": "Retrieve low-stock admin notifications.",
+        "operationId": "GetLowStockNotifications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminNotificationDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminNotificationDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminNotificationDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/appointments": {
       "get": {
         "tags": [
@@ -3636,6 +3668,85 @@
         },
         "additionalProperties": false
       },
+      "AdminNotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "partId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "salesInvoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "part": {
+            "$ref": "#/components/schemas/PartDto"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "salesInvoice": {
+            "$ref": "#/components/schemas/SalesInvoiceDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminNotificationDtoListResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminNotificationDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AppointmentDto": {
         "type": "object",
         "properties": {
@@ -5542,6 +5653,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "AdminNotifications"
+    },
     {
       "name": "Appointments"
     },

@@ -16,8 +16,8 @@ export type AdminNotificationDto = {
     isRead?: boolean;
     readAt?: string | null;
     createdAt?: string;
-    part?: PartDto | null;
-    user?: UserDto | null;
-    salesInvoice?: SalesInvoiceDto | null;
+    part?: PartDto;
+    user?: UserDto;
+    salesInvoice?: SalesInvoiceDto;
 };
 

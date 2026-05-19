@@ -5,6 +5,13 @@
 
 
 export type paths = {
+  "/api/v1/admin/notifications/low-stock": {
+    /**
+     * GetLowStockNotifications
+     * @description Retrieve low-stock admin notifications.
+     */
+    get: operations["GetLowStockNotifications"];
+  };
   "/api/appointments": {
     /**
      * GetMyAppointments
@@ -463,6 +470,33 @@ export type components = {
     AccountVerificationDto: {
       emailAddressOrUsername?: string | null;
       verificationCode?: string | null;
+    };
+    AdminNotificationDto: {
+      /** Format: uuid */
+      id?: string;
+      type?: string | null;
+      title?: string | null;
+      message?: string | null;
+      /** Format: uuid */
+      partId?: string | null;
+      /** Format: uuid */
+      userId?: string | null;
+      /** Format: uuid */
+      salesInvoiceId?: string | null;
+      isRead?: boolean;
+      /** Format: date-time */
+      readAt?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      part?: components["schemas"]["PartDto"];
+      user?: components["schemas"]["UserDto"];
+      salesInvoice?: components["schemas"]["SalesInvoiceDto"];
+    };
+    AdminNotificationDtoListResponseDto: {
+      /** Format: int32 */
+      statusCode?: number;
+      message?: string | null;
+      result?: components["schemas"]["AdminNotificationDto"][] | null;
     };
     AppointmentDto: {
       /** Format: uuid */
@@ -1116,6 +1150,22 @@ export type external = Record<string, never>;
 
 export type operations = {
 
+  /**
+   * GetLowStockNotifications
+   * @description Retrieve low-stock admin notifications.
+   */
+  GetLowStockNotifications: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/plain": components["schemas"]["AdminNotificationDtoListResponseDto"];
+          "application/json": components["schemas"]["AdminNotificationDtoListResponseDto"];
+          "text/json": components["schemas"]["AdminNotificationDtoListResponseDto"];
+        };
+      };
+    };
+  };
   /**
    * GetMyAppointments
    * @description Retrieve all appointments for the current user.
