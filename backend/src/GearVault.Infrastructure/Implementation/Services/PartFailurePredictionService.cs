@@ -409,6 +409,7 @@ public class PartFailurePredictionService(
 
     private sealed class Ai4iPredictionInput
     {
+        public string FailureType { get; set; } = "NoFailure";
         public string Type { get; set; } = string.Empty;
         public float AirTemperature { get; set; }
         public float ProcessTemperature { get; set; }
