@@ -9,6 +9,10 @@ namespace GearVault.Infrastructure.Implementation.Services;
 
 public class CreditReminderJob(IGenericRepository genericRepository) : ICreditReminderJob
 {
+    #region Overdue Credit Reminder Job
+    /// <summary>
+    /// Queues reminder emails and admin notifications for unpaid sales invoices older than one month.
+    /// </summary>
     public void QueueOverdueCreditReminders()
     {
         var oneMonthAgo = DateTime.Now.AddMonths(-1);
@@ -75,5 +79,5 @@ public class CreditReminderJob(IGenericRepository genericRepository) : ICreditRe
             genericRepository.Update(invoice);
         }
     }
+    #endregion
 }
-

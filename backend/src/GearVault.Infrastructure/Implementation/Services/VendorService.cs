@@ -8,6 +8,10 @@ namespace GearVault.Infrastructure.Implementation.Services;
 
 public class VendorService(IGenericRepository genericRepository) : IVendorService
 {
+    #region Vendor CRUD
+    /// <summary>
+    /// Retrieves all vendors for the admin vendor management list.
+    /// </summary>
     public List<VendorDto> GetAllVendors()
     {
         var vendors = genericRepository.Get<Vendor>(asNoTracking: true).ToList();
@@ -15,6 +19,9 @@ public class VendorService(IGenericRepository genericRepository) : IVendorServic
         return vendors.ConvertAll(x => x.ToVendorDto());
     }
 
+    /// <summary>
+    /// Retrieves a single vendor profile by identifier for the vendor details page.
+    /// </summary>
     public VendorDto GetVendorById(Guid vendorId)
     {
         var vendor = genericRepository.GetById<Vendor>(vendorId, asNoTracking: true)
@@ -23,6 +30,9 @@ public class VendorService(IGenericRepository genericRepository) : IVendorServic
         return vendor.ToVendorDto();
     }
 
+    /// <summary>
+    /// Creates a new vendor after validating that the vendor name is unique.
+    /// </summary>
     public VendorDto CreateVendor(CreateVendorDto dto)
     {
         if (genericRepository.Exists<Vendor>(v => v.Name == dto.Name))
@@ -42,6 +52,9 @@ public class VendorService(IGenericRepository genericRepository) : IVendorServic
         return vendor.ToVendorDto();
     }
 
+    /// <summary>
+    /// Updates vendor contact details and active status while preventing duplicate vendor names.
+    /// </summary>
     public VendorDto UpdateVendor(Guid vendorId, UpdateVendorDto dto)
     {
         var vendor = genericRepository.GetById<Vendor>(vendorId)
@@ -66,6 +79,9 @@ public class VendorService(IGenericRepository genericRepository) : IVendorServic
         return vendor.ToVendorDto();
     }
 
+    /// <summary>
+    /// Deletes a vendor record from the system when it is no longer required.
+    /// </summary>
     public void DeleteVendor(Guid vendorId)
     {
         var vendor = genericRepository.GetById<Vendor>(vendorId)
@@ -73,4 +89,5 @@ public class VendorService(IGenericRepository genericRepository) : IVendorServic
 
         genericRepository.Delete(vendor);
     }
+    #endregion
 }

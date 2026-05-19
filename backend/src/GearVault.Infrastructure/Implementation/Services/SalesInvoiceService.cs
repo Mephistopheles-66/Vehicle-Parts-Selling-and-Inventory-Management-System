@@ -51,7 +51,11 @@ public class SalesInvoiceService(
     }
     #endregion
 
-    #region Create
+    #region Sales Invoice Creation, Loyalty Discount, and Low Stock Notification
+    /// <summary>
+    /// Creates a sales invoice, applies the 10% loyalty discount when the subtotal exceeds 5000,
+    /// deducts sold stock, and creates an admin notification when a part falls below 10 units.
+    /// </summary>
     public Guid CreateInvoice(CreateSalesInvoiceDto dto)
     {
         if (dto.Items == null || dto.Items.Count == 0)
@@ -169,7 +173,12 @@ public class SalesInvoiceService(
 
         return invoiceId;
     }
+    #endregion
 
+    #region Customer Invoice History and Email
+    /// <summary>
+    /// Retrieves all sales invoices belonging to the currently logged-in customer.
+    /// </summary>
     public List<SalesInvoiceDto> GetMyInvoices()
     {
         var userId = applicationUserService.GetUserId;
@@ -184,6 +193,9 @@ public class SalesInvoiceService(
         return HydrateInvoices(invoices);
     }
 
+    /// <summary>
+    /// Queues a sales invoice email for the customer linked through the invoice vehicle.
+    /// </summary>
     public void SendInvoiceEmail(Guid invoiceId)
     {
         var invoice = genericRepository.GetById<SalesInvoice>(invoiceId)

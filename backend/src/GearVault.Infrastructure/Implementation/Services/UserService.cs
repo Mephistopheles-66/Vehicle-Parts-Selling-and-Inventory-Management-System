@@ -553,6 +553,11 @@ public class UserService(
         };
     }
 
+    #region Customer Report Generation
+
+    /// <summary>
+    /// Builds the regular customer report by ranking customers by invoice count.
+    /// </summary>
     public List<CustomerReportDto> GetRegularCustomerReports(int limit = 20)
     {
         return BuildCustomerReports(limit)
@@ -562,6 +567,9 @@ public class UserService(
             .ToList();
     }
 
+    /// <summary>
+    /// Builds the high spender report by ranking customers by lifetime spending.
+    /// </summary>
     public List<CustomerReportDto> GetHighSpenderReports(int limit = 20)
     {
         return BuildCustomerReports(limit)
@@ -571,6 +579,9 @@ public class UserService(
             .ToList();
     }
 
+    /// <summary>
+    /// Builds the pending credit report by ranking customers by outstanding balance.
+    /// </summary>
     public List<CustomerReportDto> GetPendingCreditReports(int limit = 20)
     {
         return BuildCustomerReports(limit)
@@ -644,4 +655,5 @@ public class UserService(
             .Where(report => report.InvoiceCount > 0 || report.VehicleCount > 0)
             .ToList();
     }
+    #endregion
 }

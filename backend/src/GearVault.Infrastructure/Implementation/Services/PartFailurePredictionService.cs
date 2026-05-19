@@ -22,6 +22,10 @@ public class PartFailurePredictionService(
     private static readonly object ModelLock = new();
     private static PredictionEngine<Ai4iPredictionInput, Ai4iPredictionOutput>? PredictionEngine;
 
+    #region AI Prediction Generation
+    /// <summary>
+    /// Generates and stores an ML.NET vehicle health prediction for a vehicle, then alerts admins for high-risk results.
+    /// </summary>
     public PartFailurePredictionDto GeneratePrediction(Guid vehicleId, CreatePartFailurePredictionDto dto)
     {
         var vehicle = GetAllowedVehicle(vehicleId);
@@ -62,7 +66,12 @@ public class PartFailurePredictionService(
 
         return savedPrediction.ToPartFailurePredictionDto();
     }
+    #endregion
 
+    #region AI Prediction Retrieval and Acknowledgement
+    /// <summary>
+    /// Retrieves all AI vehicle health predictions for the currently logged-in customer.
+    /// </summary>
     public List<PartFailurePredictionDto> GetMyPredictions()
     {
         var userId = applicationUserService.GetUserId;
@@ -76,6 +85,9 @@ public class PartFailurePredictionService(
         return predictions.ConvertAll(x => x.ToPartFailurePredictionDto());
     }
 
+    /// <summary>
+    /// Retrieves AI vehicle health predictions for a selected vehicle after validating access.
+    /// </summary>
     public List<PartFailurePredictionDto> GetPredictionsByVehicle(Guid vehicleId)
     {
         _ = GetAllowedVehicle(vehicleId);
@@ -89,6 +101,9 @@ public class PartFailurePredictionService(
         return predictions.ConvertAll(x => x.ToPartFailurePredictionDto());
     }
 
+    /// <summary>
+    /// Marks a generated AI prediction as acknowledged after checking vehicle access.
+    /// </summary>
     public void AcknowledgePrediction(Guid predictionId)
     {
         var prediction = genericRepository.GetById<PartFailurePrediction>(
@@ -101,7 +116,9 @@ public class PartFailurePredictionService(
         prediction.Acknowledge();
         genericRepository.Update(prediction);
     }
+    #endregion
 
+    #region Vehicle Access Guard
     private Vehicle GetAllowedVehicle(Guid vehicleId)
     {
         var vehicle = genericRepository.GetById<Vehicle>(vehicleId, includeProperties: "User")
@@ -121,7 +138,9 @@ public class PartFailurePredictionService(
         if (vehicle.UserId != applicationUserService.GetUserId)
             throw new NotFoundException("Vehicle not found.");
     }
+    #endregion
 
+    #region ML.NET Prediction Pipeline
     private PredictionInput BuildPrediction(Vehicle vehicle, CreatePartFailurePredictionDto dto)
     {
         var vehicleAge = Math.Max(0, DateTime.Now.Year - vehicle.Year);
@@ -262,7 +281,9 @@ public class PartFailurePredictionService(
             return PredictionEngine;
         }
     }
+    #endregion
 
+    #region Mapping and Recommendation Helpers
     private static string GetFailureType(Ai4iDatasetRow row)
     {
         if (row.ToolWearFailure == 1) return "ToolWearFailure";
@@ -327,7 +348,9 @@ public class PartFailurePredictionService(
     {
         return terms.Any(source.Contains);
     }
+    #endregion
 
+    #region ML.NET Data Contracts
     private sealed record PredictionInput(
         string PredictedPartName,
         string ConditionSummary,
@@ -401,4 +424,5 @@ public class PartFailurePredictionService(
 
         public float[] Score { get; set; } = [];
     }
+    #endregion
 }

@@ -37,7 +37,7 @@ app.AddCustomSwaggerInterface();
 
 app.AddCustomScalarInterface();
 
-app.UseHangfireDashboard("/hangfire");
+app.UseHangfireDashboard();
 
 RecurringJob.AddOrUpdate<ICreditReminderJob>(
     "overdue-credit-reminders",
