@@ -59,6 +59,18 @@ public class SalesInvoiceController(ISalesInvoiceService salesInvoiceService) : 
             invoiceId);
     }
 
+    [HttpGet("my")]
+    [Documentation("GetMyInvoices", "Retrieve all sales invoices for the currently logged in customer.")]
+    public ResponseDto<List<SalesInvoiceDto>> GetMyInvoices()
+    {
+        var result = salesInvoiceService.GetMyInvoices();
+
+        return new ResponseDto<List<SalesInvoiceDto>>(
+            (int)HttpStatusCode.OK,
+            "My invoices retrieved successfully.",
+            result);
+    }
+
     [HttpPost("{invoiceId:guid}/send-email")]
     [Documentation("SendInvoiceEmail", "Re-send the invoice email to the customer.")]
     public ResponseDto<bool> SendInvoiceEmail([FromRoute] Guid invoiceId)

@@ -27,4 +27,6 @@ public interface ISalesInvoiceService : ITransientService
     /// background sender picks it up. Re-sendable.
     /// </summary>
     void SendInvoiceEmail(Guid invoiceId);
+
+    List<SalesInvoiceDto> GetMyInvoices();
 }

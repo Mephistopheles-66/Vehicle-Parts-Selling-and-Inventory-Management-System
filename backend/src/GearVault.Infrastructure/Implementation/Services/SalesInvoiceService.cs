@@ -155,6 +155,20 @@ public class SalesInvoiceService(
         return invoiceId;
     }
 
+    public List<SalesInvoiceDto> GetMyInvoices()
+    {
+        var userId = applicationUserService.GetUserId;
+
+        var invoices = genericRepository.Get<SalesInvoice>(
+            x => x.Vehicle!.UserId == userId,
+            orderBys: new[] { "CreatedAt desc" },
+            asNoTracking: true).ToList();
+
+        if (invoices.Count == 0) return [];
+
+        return HydrateInvoices(invoices);
+    }
+
     public void SendInvoiceEmail(Guid invoiceId)
     {
         var invoice = genericRepository.GetById<SalesInvoice>(invoiceId)
