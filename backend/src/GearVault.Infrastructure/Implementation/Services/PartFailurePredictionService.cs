@@ -6,13 +6,22 @@ using GearVault.Application.Interfaces.Services;
 using GearVault.Domain.Common;
 using GearVault.Domain.Common.Enum;
 using GearVault.Domain.Entities;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.ML;
+using Microsoft.ML.Data;
 
 namespace GearVault.Infrastructure.Implementation.Services;
 
 public class PartFailurePredictionService(
     IGenericRepository genericRepository,
-    IApplicationUserService applicationUserService) : IPartFailurePredictionService
+    IApplicationUserService applicationUserService,
+    IWebHostEnvironment webHostEnvironment) : IPartFailurePredictionService
 {
+    private const string DatasetRelativePath = "datasets/ai4i2020.csv";
+
+    private static readonly object ModelLock = new();
+    private static PredictionEngine<Ai4iPredictionInput, Ai4iPredictionOutput>? PredictionEngine;
+
     public PartFailurePredictionDto GeneratePrediction(Guid vehicleId, CreatePartFailurePredictionDto dto)
     {
         var vehicle = GetAllowedVehicle(vehicleId);
@@ -126,67 +135,155 @@ public class PartFailurePredictionService(
 
         var invoiceCount = genericRepository.GetCount<SalesInvoice>(x => x.VehicleId == vehicle.Id);
         var appointmentCount = genericRepository.GetCount<Appointment>(x => x.VehicleId == vehicle.Id);
-        var lowerNotes = notes.ToLower();
+        var mlInput = BuildModelInput(vehicle, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, notes);
+        var mlOutput = GetPredictionEngine().Predict(mlInput);
+        var failureType = string.IsNullOrWhiteSpace(mlOutput.PredictedFailureType)
+            ? "NoFailure"
+            : mlOutput.PredictedFailureType;
 
-        var candidates = new List<PredictionCandidate>
-        {
-            ScoreCandidate("Brake Pads", 18, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "brake", "squeak", "vibration"),
-            ScoreCandidate("Battery", 14, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "battery", "start", "electric", "light"),
-            ScoreCandidate("Engine Oil Filter", 16, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "oil", "filter", "engine", "smoke"),
-            ScoreCandidate("Air Filter", 10, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "air", "dust", "mileage", "pickup"),
-            ScoreCandidate("Tyres", 12, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "tyre", "tire", "grip", "wear")
-        };
+        var confidence = mlOutput.Score is { Length: > 0 }
+            ? Math.Clamp((decimal)mlOutput.Score.Max() * 100m, 0, 100)
+            : 50m;
 
-        if (vehicle.FuelType == FuelType.Electric)
-        {
-            candidates.Add(ScoreCandidate("EV Battery Cooling Component", 20, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "heat", "battery", "range", "charging"));
-        }
-        else
-        {
-            candidates.Add(ScoreCandidate("Fuel Filter", 12, mileage, averageDailyKm, daysSinceService, invoiceCount, appointmentCount, lowerNotes, "fuel", "diesel", "petrol", "gas"));
-        }
+        var riskScore = failureType == "NoFailure"
+            ? Math.Clamp(100m - confidence, 5, 35)
+            : Math.Clamp(confidence, 35, 100);
 
-        var best = candidates.OrderByDescending(x => x.RiskScore).First();
-        var severity = ToSeverity(best.RiskScore);
-        var predictedFailureDate = DateTime.Now.Date.AddDays(Math.Max(7, 130 - (int)Math.Round(best.RiskScore)));
+        var predictedPartName = MapFailureTypeToPart(failureType, vehicle.FuelType);
+        var severity = ToSeverity(riskScore);
+        var predictedFailureDate = DateTime.Now.Date.AddDays(Math.Max(7, 130 - (int)Math.Round(riskScore)));
 
         var conditionSummary = string.IsNullOrWhiteSpace(notes)
             ? $"{vehicle.Make} {vehicle.Model} is evaluated from age, mileage, service gap, and recorded system history."
             : notes;
 
-        var usageSummary = $"{usagePattern}. Estimated mileage: {mileage:N0} km, average daily use: {averageDailyKm:N1} km, last service gap: {daysSinceService} days.";
-        var recommendation = BuildRecommendation(best.PredictedPartName, severity, predictedFailureDate);
+        var usageSummary = $"{usagePattern}. Estimated mileage: {mileage:N0} km, average daily use: {averageDailyKm:N1} km, last service gap: {daysSinceService} days. ML.NET model output: {failureType} ({confidence:N1}% confidence).";
+        var recommendation = BuildRecommendation(predictedPartName, severity, predictedFailureDate);
 
         return new PredictionInput(
-            best.PredictedPartName,
+            predictedPartName,
             conditionSummary,
             usageSummary,
-            best.RiskScore,
+            riskScore,
             severity,
             predictedFailureDate,
             recommendation);
     }
 
-    private static PredictionCandidate ScoreCandidate(
-        string partName,
-        decimal baseScore,
+    private Ai4iPredictionInput BuildModelInput(
+        Vehicle vehicle,
         int mileage,
         decimal averageDailyKm,
         int daysSinceService,
         int invoiceCount,
         int appointmentCount,
-        string notes,
-        params string[] keywords)
+        string notes)
     {
-        var score = baseScore;
-        score += Math.Min(30, mileage / 3500m);
-        score += Math.Min(18, averageDailyKm / 3m);
-        score += Math.Min(22, daysSinceService / 18m);
-        score += Math.Min(8, invoiceCount * 1.5m);
-        score += Math.Min(7, appointmentCount * 1.25m);
-        score += keywords.Any(notes.Contains) ? 24 : 0;
+        var lowerNotes = notes.ToLower();
+        var stressScore = Math.Min(1m,
+            (mileage / 180000m) +
+            (averageDailyKm / 220m) +
+            (daysSinceService / 900m) +
+            (invoiceCount * 0.015m) +
+            (appointmentCount * 0.012m));
 
-        return new PredictionCandidate(partName, Math.Clamp(Math.Round(score, 2), 0, 100));
+        var heatSymptoms = ContainsAny(lowerNotes, "overheating", "heat", "smoke");
+        var powerSymptoms = ContainsAny(lowerNotes, "battery", "warning", "start", "electric", "light");
+        var wearSymptoms = ContainsAny(lowerNotes, "wear", "tyre", "tire", "brake", "squeak", "vibration", "grip");
+        var processTemperature = 308f + (float)(stressScore * 12m) + (heatSymptoms ? 4.5f : 0f);
+        var airTemperature = processTemperature - (heatSymptoms ? 7.5f : 10.4f);
+        var rotationalSpeed = 1550f - (float)(stressScore * 300m) - (wearSymptoms ? 70f : 0f);
+        var torque = 39f + (float)(stressScore * 24m) + (powerSymptoms ? 12f : 0f);
+        var toolWear = Math.Clamp(
+            (float)(mileage / 650m + daysSinceService / 5m + invoiceCount * 4 + appointmentCount * 3 + (wearSymptoms ? 45 : 0)),
+            0,
+            260);
+
+        return new Ai4iPredictionInput
+        {
+            Type = vehicle.FuelType == FuelType.Electric ? "H" : averageDailyKm > 70 ? "M" : "L",
+            AirTemperature = airTemperature,
+            ProcessTemperature = processTemperature,
+            RotationalSpeed = rotationalSpeed,
+            Torque = torque,
+            ToolWear = toolWear
+        };
+    }
+
+    private PredictionEngine<Ai4iPredictionInput, Ai4iPredictionOutput> GetPredictionEngine()
+    {
+        if (PredictionEngine != null) return PredictionEngine;
+
+        lock (ModelLock)
+        {
+            if (PredictionEngine != null) return PredictionEngine;
+
+            var datasetPath = Path.Combine(webHostEnvironment.WebRootPath, DatasetRelativePath);
+            if (!File.Exists(datasetPath))
+                throw new NotFoundException("AI predictive maintenance dataset was not found.");
+
+            var mlContext = new MLContext(seed: 42);
+            var data = mlContext.Data.LoadFromTextFile<Ai4iDatasetRow>(
+                datasetPath,
+                hasHeader: true,
+                separatorChar: ',');
+
+            var mappedData = mlContext.Data.CreateEnumerable<Ai4iDatasetRow>(data, reuseRowObject: false)
+                .Select(row => new Ai4iTrainingRow
+                {
+                    Type = row.Type,
+                    AirTemperature = row.AirTemperature,
+                    ProcessTemperature = row.ProcessTemperature,
+                    RotationalSpeed = row.RotationalSpeed,
+                    Torque = row.Torque,
+                    ToolWear = row.ToolWear,
+                    FailureType = GetFailureType(row)
+                });
+
+            var trainingData = mlContext.Data.LoadFromEnumerable(mappedData);
+            var pipeline = mlContext.Transforms.Conversion.MapValueToKey("Label", nameof(Ai4iTrainingRow.FailureType))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding("TypeEncoded", nameof(Ai4iTrainingRow.Type)))
+                .Append(mlContext.Transforms.Concatenate(
+                    "Features",
+                    "TypeEncoded",
+                    nameof(Ai4iTrainingRow.AirTemperature),
+                    nameof(Ai4iTrainingRow.ProcessTemperature),
+                    nameof(Ai4iTrainingRow.RotationalSpeed),
+                    nameof(Ai4iTrainingRow.Torque),
+                    nameof(Ai4iTrainingRow.ToolWear)))
+                .Append(mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
+                .Append(mlContext.Transforms.Conversion.MapKeyToValue(
+                    nameof(Ai4iPredictionOutput.PredictedFailureType),
+                    "PredictedLabel"));
+
+            var model = pipeline.Fit(trainingData);
+            PredictionEngine = mlContext.Model.CreatePredictionEngine<Ai4iPredictionInput, Ai4iPredictionOutput>(model);
+
+            return PredictionEngine;
+        }
+    }
+
+    private static string GetFailureType(Ai4iDatasetRow row)
+    {
+        if (row.ToolWearFailure == 1) return "ToolWearFailure";
+        if (row.HeatDissipationFailure == 1) return "HeatDissipationFailure";
+        if (row.PowerFailure == 1) return "PowerFailure";
+        if (row.OverstrainFailure == 1) return "OverstrainFailure";
+        if (row.RandomFailure == 1) return "RandomFailure";
+        return "NoFailure";
+    }
+
+    private static string MapFailureTypeToPart(string failureType, FuelType fuelType)
+    {
+        return failureType switch
+        {
+            "ToolWearFailure" => "Brake Pads",
+            "HeatDissipationFailure" => fuelType == FuelType.Electric ? "EV Battery Cooling Component" : "Radiator Cooling Component",
+            "PowerFailure" => "Battery",
+            "OverstrainFailure" => "Clutch Assembly",
+            "RandomFailure" => "Engine Oil Filter",
+            _ => "General Maintenance Inspection"
+        };
     }
 
     private Part? FindMatchingPart(string predictedPartName)
@@ -226,7 +323,10 @@ public class PartFailurePredictionService(
         return $"{partName} shows {severity} risk. Predicted attention date: {predictedFailureDate:dd MMM yyyy}. {action}";
     }
 
-    private sealed record PredictionCandidate(string PredictedPartName, decimal RiskScore);
+    private static bool ContainsAny(string source, params string[] terms)
+    {
+        return terms.Any(source.Contains);
+    }
 
     private sealed record PredictionInput(
         string PredictedPartName,
@@ -236,4 +336,69 @@ public class PartFailurePredictionService(
         PredictionSeverity Severity,
         DateTime PredictedFailureDate,
         string Recommendation);
+
+    private sealed class Ai4iDatasetRow
+    {
+        [LoadColumn(2)]
+        public string Type { get; set; } = string.Empty;
+
+        [LoadColumn(3)]
+        public float AirTemperature { get; set; }
+
+        [LoadColumn(4)]
+        public float ProcessTemperature { get; set; }
+
+        [LoadColumn(5)]
+        public float RotationalSpeed { get; set; }
+
+        [LoadColumn(6)]
+        public float Torque { get; set; }
+
+        [LoadColumn(7)]
+        public float ToolWear { get; set; }
+
+        [LoadColumn(9)]
+        public float ToolWearFailure { get; set; }
+
+        [LoadColumn(10)]
+        public float HeatDissipationFailure { get; set; }
+
+        [LoadColumn(11)]
+        public float PowerFailure { get; set; }
+
+        [LoadColumn(12)]
+        public float OverstrainFailure { get; set; }
+
+        [LoadColumn(13)]
+        public float RandomFailure { get; set; }
+    }
+
+    private sealed class Ai4iTrainingRow
+    {
+        public string Type { get; set; } = string.Empty;
+        public float AirTemperature { get; set; }
+        public float ProcessTemperature { get; set; }
+        public float RotationalSpeed { get; set; }
+        public float Torque { get; set; }
+        public float ToolWear { get; set; }
+        public string FailureType { get; set; } = string.Empty;
+    }
+
+    private sealed class Ai4iPredictionInput
+    {
+        public string Type { get; set; } = string.Empty;
+        public float AirTemperature { get; set; }
+        public float ProcessTemperature { get; set; }
+        public float RotationalSpeed { get; set; }
+        public float Torque { get; set; }
+        public float ToolWear { get; set; }
+    }
+
+    private sealed class Ai4iPredictionOutput
+    {
+        [ColumnName("PredictedFailureType")]
+        public string PredictedFailureType { get; set; } = string.Empty;
+
+        public float[] Score { get; set; } = [];
+    }
 }
