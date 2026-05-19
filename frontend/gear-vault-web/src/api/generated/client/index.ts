@@ -28,6 +28,8 @@ export type { CreateVendorDto } from './models/CreateVendorDto';
 export type { CreateWalkInVehicleDto } from './models/CreateWalkInVehicleDto';
 export type { CustomerFullProfileDto } from './models/CustomerFullProfileDto';
 export type { CustomerFullProfileDtoResponseDto } from './models/CustomerFullProfileDtoResponseDto';
+export type { CustomerReportDto } from './models/CustomerReportDto';
+export type { CustomerReportDtoListResponseDto } from './models/CustomerReportDtoListResponseDto';
 export type { CustomerSearchResultDto } from './models/CustomerSearchResultDto';
 export type { CustomerSearchResultDtoListResponseDto } from './models/CustomerSearchResultDtoListResponseDto';
 export type { FuelType } from './models/FuelType';

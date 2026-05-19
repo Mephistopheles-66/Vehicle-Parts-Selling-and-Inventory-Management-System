@@ -53,4 +53,18 @@ public class EmailDto
 
     public DateTime? AppointmentDate { get; set; }
     #endregion
+
+    #region Sales Invoice Fields
+    public string? InvoiceNumber { get; set; }
+
+    public decimal? SubTotal { get; set; }
+
+    public decimal? DiscountAmount { get; set; }
+
+    public decimal? TotalAmount { get; set; }
+
+    public decimal? BalanceDue { get; set; }
+
+    public DateTime? InvoiceDate { get; set; }
+    #endregion
 }

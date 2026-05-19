@@ -2987,6 +2987,135 @@
         }
       }
     },
+    "/api/v1/user/customers/reports/regulars": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "GetRegularCustomerReports",
+        "description": "Retrieve regular customers ranked by purchase frequency.",
+        "operationId": "GetRegularCustomerReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/customers/reports/high-spenders": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "GetHighSpenderReports",
+        "description": "Retrieve customers ranked by lifetime spending.",
+        "operationId": "GetHighSpenderReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/customers/reports/pending-credits": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "GetPendingCreditReports",
+        "description": "Retrieve customers with pending credit balances.",
+        "operationId": "GetPendingCreditReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReportDtoListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/vehicles": {
       "get": {
         "tags": [
@@ -3982,6 +4111,57 @@
           },
           "result": {
             "$ref": "#/components/schemas/CustomerFullProfileDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerReportDto": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "vehicleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "invoiceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalSpent": {
+            "type": "number",
+            "format": "double"
+          },
+          "pendingCredit": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastPurchaseAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomerReportDtoListResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerReportDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

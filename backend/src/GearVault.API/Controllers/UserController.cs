@@ -162,4 +162,40 @@ public class UserController(IUserService userService) : BaseController<UserContr
             "Successfully fetched customer profile.",
             result);
     }
+
+    [HttpGet("customers/reports/regulars")]
+    [Documentation("GetRegularCustomerReports", "Retrieve regular customers ranked by purchase frequency.")]
+    public ResponseDto<List<CustomerReportDto>> GetRegularCustomerReports([FromQuery] int limit = 20)
+    {
+        var result = userService.GetRegularCustomerReports(limit);
+
+        return new ResponseDto<List<CustomerReportDto>>(
+            (int)HttpStatusCode.OK,
+            "Successfully fetched regular customer reports.",
+            result);
+    }
+
+    [HttpGet("customers/reports/high-spenders")]
+    [Documentation("GetHighSpenderReports", "Retrieve customers ranked by lifetime spending.")]
+    public ResponseDto<List<CustomerReportDto>> GetHighSpenderReports([FromQuery] int limit = 20)
+    {
+        var result = userService.GetHighSpenderReports(limit);
+
+        return new ResponseDto<List<CustomerReportDto>>(
+            (int)HttpStatusCode.OK,
+            "Successfully fetched high spender reports.",
+            result);
+    }
+
+    [HttpGet("customers/reports/pending-credits")]
+    [Documentation("GetPendingCreditReports", "Retrieve customers with pending credit balances.")]
+    public ResponseDto<List<CustomerReportDto>> GetPendingCreditReports([FromQuery] int limit = 20)
+    {
+        var result = userService.GetPendingCreditReports(limit);
+
+        return new ResponseDto<List<CustomerReportDto>>(
+            (int)HttpStatusCode.OK,
+            "Successfully fetched pending credit reports.",
+            result);
+    }
 }

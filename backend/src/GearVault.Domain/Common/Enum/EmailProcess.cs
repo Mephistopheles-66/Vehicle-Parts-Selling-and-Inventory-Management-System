@@ -5,5 +5,6 @@ public enum EmailProcess
     CustomerRegistration,
     UserRegistration,
     AppointmentConfirmation,
-    SalesInvoiceCreated
+    SalesInvoiceCreated,
+    CreditReminder
 }

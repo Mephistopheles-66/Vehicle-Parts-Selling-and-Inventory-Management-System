@@ -110,6 +110,16 @@ public class EmailService(IWebHostEnvironment webHostEnvironment, IOptions<SmtpS
                 result.Add(new("{{VehicleModel}}", email.VehicleModel ?? string.Empty));
                 result.Add(new("{{AppointmentDate}}", email.AppointmentDate?.ToString("dd MMM yyyy HH:mm") ?? string.Empty));
                 break;
+
+            case EmailProcess.SalesInvoiceCreated:
+            case EmailProcess.CreditReminder:
+                result.Add(new("{{InvoiceNumber}}", email.InvoiceNumber ?? string.Empty));
+                result.Add(new("{{InvoiceDate}}", email.InvoiceDate?.ToString("dd MMM yyyy") ?? string.Empty));
+                result.Add(new("{{SubTotal}}", (email.SubTotal ?? 0).ToString("N2")));
+                result.Add(new("{{DiscountAmount}}", (email.DiscountAmount ?? 0).ToString("N2")));
+                result.Add(new("{{TotalAmount}}", (email.TotalAmount ?? 0).ToString("N2")));
+                result.Add(new("{{BalanceDue}}", (email.BalanceDue ?? 0).ToString("N2")));
+                break;
         }
 
         return result;

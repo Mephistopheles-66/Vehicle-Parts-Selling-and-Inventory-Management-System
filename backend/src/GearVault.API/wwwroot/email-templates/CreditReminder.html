@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Payment Reminder</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
+    <p>Hi {{Name}},</p>
+    <p>This is a reminder that invoice <strong>{{InvoiceNumber}}</strong> still has an unpaid balance.</p>
+    <table style="border-collapse: collapse; width: 100%; max-width: 520px;">
+        <tr><td style="padding: 6px 0;">Invoice date</td><td style="padding: 6px 0; text-align: right;">{{InvoiceDate}}</td></tr>
+        <tr><td style="padding: 6px 0;">Invoice total</td><td style="padding: 6px 0; text-align: right;">Rs. {{TotalAmount}}</td></tr>
+        <tr><td style="padding: 6px 0; font-weight: bold;">Balance due</td><td style="padding: 6px 0; text-align: right; font-weight: bold;">Rs. {{BalanceDue}}</td></tr>
+    </table>
+    <p>Please clear the pending amount at your earliest convenience.</p>
+    <p style="color: #6b7280; font-size: 12px;">&copy; {{CurrentYear}} GearVault</p>
+</body>
+</html>

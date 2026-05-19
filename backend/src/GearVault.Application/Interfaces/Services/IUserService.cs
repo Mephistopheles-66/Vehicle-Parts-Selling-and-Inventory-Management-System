@@ -57,4 +57,10 @@ public interface IUserService : ITransientService
     // all their vehicles, recent invoices, and computed totals.
     // Used by the staff-facing customer details page.
     CustomerFullProfileDto GetCustomerFullProfile(Guid customerId, int recentInvoiceLimit = 20);
+
+    List<CustomerReportDto> GetRegularCustomerReports(int limit = 20);
+
+    List<CustomerReportDto> GetHighSpenderReports(int limit = 20);
+
+    List<CustomerReportDto> GetPendingCreditReports(int limit = 20);
 }
