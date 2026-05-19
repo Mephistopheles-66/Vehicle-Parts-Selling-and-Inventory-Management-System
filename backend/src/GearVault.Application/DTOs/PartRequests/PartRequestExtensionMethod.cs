@@ -10,6 +10,7 @@ public static class PartRequestExtensionMethod
         {
             Id = partRequest.Id,
             CustomerUserId = partRequest.CustomerUserId,
+            CustomerName = partRequest.Customer?.Name ?? string.Empty,
             PartName = partRequest.PartName,
             Description = partRequest.Description,
             Status = partRequest.Status.ToString().ToUpper(),

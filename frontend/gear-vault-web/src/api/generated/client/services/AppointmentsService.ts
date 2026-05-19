@@ -11,6 +11,19 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AppointmentsService {
     /**
+     * GetAllAppointments
+     * Retrieve all appointments. Staff and admin only.
+     * @returns AppointmentDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getAllAppointments(): CancelablePromise<AppointmentDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/appointments/all',
+        });
+    }
+
+    /**
      * GetMyAppointments
      * Retrieve all appointments for the current user.
      * @returns AppointmentDtoListResponseDto OK
@@ -96,6 +109,45 @@ export class AppointmentsService {
         return __request(OpenAPI, {
             method: 'PUT',
             url: '/api/appointments/{appointmentId}/cancel',
+            path: {
+                'appointmentId': appointmentId,
+            },
+        });
+    }
+
+    /**
+     * CreateAppointmentByStaff
+     * Create an appointment for any customer vehicle. Staff and admin only.
+     * @returns AppointmentDtoResponseDto OK
+     * @throws ApiError
+     */
+    public static createAppointmentByStaff({
+        requestBody,
+    }: {
+        requestBody?: CreateAppointmentDto,
+    }): CancelablePromise<AppointmentDtoResponseDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/appointments/staff',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * CompleteAppointment
+     * Mark an appointment as completed. Staff and admin only.
+     * @returns AppointmentDtoResponseDto OK
+     * @throws ApiError
+     */
+    public static completeAppointment({
+        appointmentId,
+    }: {
+        appointmentId: string,
+    }): CancelablePromise<AppointmentDtoResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/appointments/{appointmentId}/complete',
             path: {
                 'appointmentId': appointmentId,
             },

@@ -17,6 +17,7 @@ public static class AppointmentExtensionMethod
             VehicleNumber = appointment.Vehicle?.VehicleNumber ?? string.Empty,
             VehicleMake = appointment.Vehicle?.Make ?? string.Empty,
             VehicleModel = appointment.Vehicle?.Model ?? string.Empty,
+            CustomerName = appointment.Customer?.Name ?? string.Empty,
             IsActive = appointment.IsActive,
             CreatedAt = appointment.CreatedAt,
             UpdatedAt = appointment.UpdatedAt

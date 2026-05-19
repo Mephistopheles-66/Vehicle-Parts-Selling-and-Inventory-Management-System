@@ -21,7 +21,16 @@ public class AppointmentService(
         var appointments = genericRepository.Get<Appointment>(
             x => x.CustomerUserId == userId,
             asNoTracking: true,
-            includeProperties: "Vehicle").ToList();
+            includeProperties: "Vehicle,Customer").ToList();
+
+        return appointments.ConvertAll(x => x.ToAppointmentDto());
+    }
+
+    public List<AppointmentDto> GetAllAppointments()
+    {
+        var appointments = genericRepository.Get<Appointment>(
+            asNoTracking: true,
+            includeProperties: "Vehicle,Customer").ToList();
 
         return appointments.ConvertAll(x => x.ToAppointmentDto());
     }
@@ -33,7 +42,7 @@ public class AppointmentService(
         var appointment = genericRepository.GetById<Appointment>(
             appointmentId,
             asNoTracking: true,
-            includeProperties: "Vehicle")
+            includeProperties: "Vehicle,Customer")
             ?? throw new NotFoundException("Appointment not found.");
 
         if (appointment.CustomerUserId != userId)
@@ -106,5 +115,35 @@ public class AppointmentService(
         genericRepository.Update(appointment);
 
         return GetAppointmentById(appointmentId);
+    }
+
+    public AppointmentDto CreateAppointmentByStaff(CreateAppointmentDto dto)
+    {
+        var vehicle = genericRepository.GetById<Vehicle>(dto.VehicleId, asNoTracking: true)
+            ?? throw new NotFoundException("Vehicle not found.");
+
+        var appointment = new Appointment(dto.VehicleId, vehicle.UserId, dto.ScheduledAt, dto.Notes);
+        genericRepository.Insert(appointment);
+
+        return genericRepository.GetById<Appointment>(appointment.Id, asNoTracking: true,
+            includeProperties: "Vehicle,Customer")!.ToAppointmentDto();
+    }
+
+    public AppointmentDto CompleteAppointment(Guid appointmentId)
+    {
+        var appointment = genericRepository.GetById<Appointment>(appointmentId)
+            ?? throw new NotFoundException("Appointment not found.");
+
+        if (appointment.Status == AppointmentStatus.Completed)
+            throw new BadRequestException("Appointment is already completed.");
+
+        if (appointment.Status == AppointmentStatus.Cancelled)
+            throw new BadRequestException("Cannot complete a cancelled appointment.");
+
+        appointment.Complete();
+        genericRepository.Update(appointment);
+
+        return genericRepository.GetById<Appointment>(appointmentId, asNoTracking: true,
+            includeProperties: "Vehicle,Customer")!.ToAppointmentDto();
     }
 }

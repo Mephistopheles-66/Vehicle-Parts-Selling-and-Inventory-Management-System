@@ -12,6 +12,7 @@ export type AppointmentDto = {
     vehicleNumber?: string | null;
     vehicleMake?: string | null;
     vehicleModel?: string | null;
+    customerName?: string | null;
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;

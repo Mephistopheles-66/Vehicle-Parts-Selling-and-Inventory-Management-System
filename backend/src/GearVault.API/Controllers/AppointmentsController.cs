@@ -13,6 +13,17 @@ namespace GearVault.API.Controllers;
 [Route("api/appointments")]
 public class AppointmentsController(IAppointmentService appointmentService) : ControllerBase
 {
+    [HttpGet("all")]
+    [Documentation("GetAllAppointments", "Retrieve all appointments. Staff and admin only.")]
+    public ResponseDto<List<AppointmentDto>> GetAllAppointments()
+    {
+        var result = appointmentService.GetAllAppointments();
+        return new ResponseDto<List<AppointmentDto>>(
+            (int)HttpStatusCode.OK,
+            "All appointments retrieved successfully.",
+            result);
+    }
+
     [HttpGet]
     [Documentation("GetMyAppointments", "Retrieve all appointments for the current user.")]
     public ResponseDto<List<AppointmentDto>> GetMyAppointments()
@@ -65,6 +76,28 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         return new ResponseDto<AppointmentDto>(
             (int)HttpStatusCode.OK,
             "Appointment cancelled successfully.",
+            result);
+    }
+
+    [HttpPost("staff")]
+    [Documentation("CreateAppointmentByStaff", "Create an appointment for any customer vehicle. Staff and admin only.")]
+    public ResponseDto<AppointmentDto> CreateAppointmentByStaff([FromBody] CreateAppointmentDto dto)
+    {
+        var result = appointmentService.CreateAppointmentByStaff(dto);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.Created,
+            "Appointment created successfully.",
+            result);
+    }
+
+    [HttpPut("{appointmentId:guid}/complete")]
+    [Documentation("CompleteAppointment", "Mark an appointment as completed. Staff and admin only.")]
+    public ResponseDto<AppointmentDto> CompleteAppointment([FromRoute] Guid appointmentId)
+    {
+        var result = appointmentService.CompleteAppointment(appointmentId);
+        return new ResponseDto<AppointmentDto>(
+            (int)HttpStatusCode.OK,
+            "Appointment marked as completed.",
             result);
     }
 }

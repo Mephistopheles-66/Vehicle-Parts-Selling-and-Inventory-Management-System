@@ -7,6 +7,10 @@ public interface IPartRequestService : ITransientService
 {
     List<PartRequestDto> GetMyPartRequests();
 
+    List<PartRequestDto> GetAllPartRequests();
+
+    PartRequestDto UpdatePartRequestStatus(Guid partRequestId, string status);
+
     PartRequestDto GetPartRequestById(Guid partRequestId);
 
     PartRequestDto CreatePartRequest(CreatePartRequestDto dto);

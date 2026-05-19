@@ -117,9 +117,10 @@ export const MyAppointments = () => {
   });
 
   const statusVariant = (s?: string | null) => {
-    if (s === 'Completed') return 'success';
-    if (s === 'Cancelled') return 'danger';
-    if (s === 'InProgress') return 'info';
+    const u = s?.toUpperCase();
+    if (u === 'COMPLETED') return 'success';
+    if (u === 'CANCELLED') return 'danger';
+    if (u === 'CONFIRMED') return 'info';
     return 'neutral';
   };
 
@@ -163,7 +164,7 @@ export const MyAppointments = () => {
                 </div>
               )}
 
-              {a.status === 'Scheduled' && reschedulingId !== a.id && (
+              {a.status?.toUpperCase() === 'PENDING' && reschedulingId !== a.id && (
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => { setReschedulingId(a.id ?? null); setNewScheduledAt(''); setRescheduleNotes(a.notes ?? ''); }}>
                     Reschedule
@@ -378,7 +379,7 @@ export const Reviews = () => {
     queryFn: async () => unwrapApiResult(await AppointmentsService.getMyAppointments(), []),
   });
 
-  const completedAppointments = appointments.filter(a => a.status === 'Completed');
+  const completedAppointments = appointments.filter(a => a.status?.toUpperCase() === 'COMPLETED');
   const reviewedIds = new Set(reviews.map(r => r.appointmentId));
   const unreviewedAppointments = completedAppointments.filter(a => !reviewedIds.has(a.id));
 

@@ -1,4 +1,5 @@
 using GearVault.Domain.Entities;
+using GearVault.Domain.Common.Enum;
 using GearVault.Application.Common.User;
 using GearVault.Application.DTOs.PartRequests;
 using GearVault.Application.Exceptions;
@@ -17,7 +18,8 @@ public class PartRequestService(
 
         var partRequests = genericRepository.Get<PartRequest>(
             x => x.CustomerUserId == userId,
-            asNoTracking: true).ToList();
+            asNoTracking: true,
+            includeProperties: "Customer").ToList();
 
         return partRequests.ConvertAll(x => x.ToPartRequestDto());
     }
@@ -26,11 +28,36 @@ public class PartRequestService(
     {
         var userId = applicationUserService.GetUserId;
 
-        var partRequest = genericRepository.GetById<PartRequest>(partRequestId, asNoTracking: true)
+        var partRequest = genericRepository.GetById<PartRequest>(partRequestId, asNoTracking: true,
+            includeProperties: "Customer")
             ?? throw new NotFoundException("Part request not found.");
 
         if (partRequest.CustomerUserId != userId)
             throw new NotFoundException("Part request not found.");
+
+        return partRequest.ToPartRequestDto();
+    }
+
+    public List<PartRequestDto> GetAllPartRequests()
+    {
+        var partRequests = genericRepository.Get<PartRequest>(
+            asNoTracking: true,
+            includeProperties: "Customer").ToList();
+
+        return partRequests.ConvertAll(x => x.ToPartRequestDto());
+    }
+
+    public PartRequestDto UpdatePartRequestStatus(Guid partRequestId, string status)
+    {
+        if (!Enum.TryParse<PartRequestStatus>(status, ignoreCase: true, out var parsedStatus))
+            throw new BadRequestException("Invalid status value.");
+
+        var partRequest = genericRepository.GetById<PartRequest>(partRequestId,
+            includeProperties: "Customer")
+            ?? throw new NotFoundException("Part request not found.");
+
+        partRequest.UpdateStatus(parsedStatus);
+        genericRepository.Update(partRequest);
 
         return partRequest.ToPartRequestDto();
     }

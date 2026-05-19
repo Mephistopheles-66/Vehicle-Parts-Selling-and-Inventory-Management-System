@@ -13,6 +13,28 @@ namespace GearVault.API.Controllers;
 [Route("api/part-requests")]
 public class PartRequestsController(IPartRequestService partRequestService) : ControllerBase
 {
+    [HttpGet("all")]
+    [Documentation("GetAllPartRequests", "Retrieve all part requests. Staff and admin only.")]
+    public ResponseDto<List<PartRequestDto>> GetAllPartRequests()
+    {
+        var result = partRequestService.GetAllPartRequests();
+        return new ResponseDto<List<PartRequestDto>>(
+            (int)HttpStatusCode.OK,
+            "All part requests retrieved successfully.",
+            result);
+    }
+
+    [HttpPut("{partRequestId:guid}/status")]
+    [Documentation("UpdatePartRequestStatus", "Update the status of a part request. Staff and admin only.")]
+    public ResponseDto<PartRequestDto> UpdatePartRequestStatus([FromRoute] Guid partRequestId, [FromBody] string status)
+    {
+        var result = partRequestService.UpdatePartRequestStatus(partRequestId, status);
+        return new ResponseDto<PartRequestDto>(
+            (int)HttpStatusCode.OK,
+            "Part request status updated successfully.",
+            result);
+    }
+
     [HttpGet]
     [Documentation("GetMyPartRequests", "Retrieve all part requests submitted by the current user.")]
     public ResponseDto<List<PartRequestDto>> GetMyPartRequests()

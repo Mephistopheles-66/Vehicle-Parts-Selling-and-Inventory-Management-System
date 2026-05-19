@@ -5,6 +5,7 @@
 export type PartRequestDto = {
     id?: string;
     customerUserId?: string;
+    customerName?: string | null;
     partName?: string | null;
     description?: string | null;
     status?: string | null;

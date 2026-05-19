@@ -12,6 +12,43 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class PartRequestsService {
     /**
+     * GetAllPartRequests
+     * Retrieve all part requests. Staff and admin only.
+     * @returns PartRequestDtoListResponseDto OK
+     * @throws ApiError
+     */
+    public static getAllPartRequests(): CancelablePromise<PartRequestDtoListResponseDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/part-requests/all',
+        });
+    }
+
+    /**
+     * UpdatePartRequestStatus
+     * Update the status of a part request. Staff and admin only.
+     * @returns PartRequestDtoResponseDto OK
+     * @throws ApiError
+     */
+    public static updatePartRequestStatus({
+        partRequestId,
+        requestBody,
+    }: {
+        partRequestId: string,
+        requestBody?: string,
+    }): CancelablePromise<PartRequestDtoResponseDto> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/part-requests/{partRequestId}/status',
+            path: {
+                'partRequestId': partRequestId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
      * GetMyPartRequests
      * Retrieve all part requests submitted by the current user.
      * @returns PartRequestDtoListResponseDto OK
