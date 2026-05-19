@@ -141,12 +141,9 @@ public class UserService(
 
     public List<CustomerSearchResultDto> SearchCustomers(string searchTerm, int limit = 20)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
-            throw new BadRequestException("Search term cannot be empty.");
-
         if (limit <= 0 || limit > 100) limit = 20;
 
-        var term = searchTerm.Trim().ToLower();
+        var term = searchTerm?.Trim().ToLower() ?? string.Empty;
         var customerRoleId = Guid.Parse(Constants.Roles.Customer.Id);
 
         // Try parsing as a Guid — supports search by customer ID.
@@ -157,6 +154,7 @@ public class UserService(
             u =>
                 u.RoleId == customerRoleId &&
                 (
+                    string.IsNullOrWhiteSpace(term) ||
                     (idMatch != null && u.Id == idMatch) ||
                     u.Name.ToLower().Contains(term) ||
                     u.PhoneNumber.ToLower().Contains(term) ||
@@ -165,10 +163,12 @@ public class UserService(
         ).Take(limit).ToList();
 
         // Step 2: find vehicles whose number matches; collect their owner user IDs.
-        var vehicleMatches = genericRepository.Get<Vehicle>(
-            v => v.VehicleNumber.ToLower().Contains(term)
-                 || v.LicenseNumber.ToLower().Contains(term)
-        ).Take(limit).ToList();
+        var vehicleMatches = string.IsNullOrWhiteSpace(term)
+            ? new List<Vehicle>()
+            : genericRepository.Get<Vehicle>(
+                v => v.VehicleNumber.ToLower().Contains(term)
+                     || v.LicenseNumber.ToLower().Contains(term)
+            ).Take(limit).ToList();
 
         var matchedCustomerIds = vehicleMatches
             .Select(v => v.UserId)

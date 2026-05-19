@@ -73,11 +73,10 @@ const CreateSalesInvoice = () => {
         unwrapApiResult(
           await UserService.searchCustomers({
             q: debouncedCustomerSearch,
-            limit: 10,
+            limit: 50,
           }),
           [],
         ),
-      enabled: debouncedCustomerSearch.length > 0 && !selectedCustomer,
     });
 
   // --- Parts selection ---
@@ -90,15 +89,16 @@ const CreateSalesInvoice = () => {
 
   const partResults = useMemo(() => {
     const needle = partSearch.trim().toLowerCase();
-    if (!needle) return [];
     return allParts
       .filter(
         (p) =>
           p.isActive &&
-          ((p.name ?? "").toLowerCase().includes(needle) ||
-            (p.partNumber ?? "").toLowerCase().includes(needle)),
+          (!needle ||
+            (p.name ?? "").toLowerCase().includes(needle) ||
+            (p.partNumber ?? "").toLowerCase().includes(needle) ||
+            (p.category ?? "").toLowerCase().includes(needle)),
       )
-      .slice(0, 5);
+      .slice(0, 50);
   }, [allParts, partSearch]);
 
   // --- Cart ---
@@ -106,9 +106,20 @@ const CreateSalesInvoice = () => {
 
   const addToCart = (part: PartDto) => {
     if (!part.id) return;
+    const stockQuantity = part.stockQuantity ?? 0;
+    if (stockQuantity <= 0) {
+      toast.error("This part is out of stock");
+      return;
+    }
+
     setCart((prev) => {
       const existing = prev.find((c) => c.part.id === part.id);
       if (existing) {
+        if (existing.quantity >= stockQuantity) {
+          toast.error(`Only ${stockQuantity} in stock for ${part.name}`);
+          return prev;
+        }
+
         return prev.map((c) =>
           c.part.id === part.id ? { ...c, quantity: c.quantity + 1 } : c,
         );
@@ -119,11 +130,22 @@ const CreateSalesInvoice = () => {
   };
 
   const updateQty = (partId: string, qty: number) => {
-    if (qty <= 0) {
+    if (!Number.isFinite(qty) || qty <= 0) {
       setCart((prev) => prev.filter((c) => c.part.id !== partId));
     } else {
       setCart((prev) =>
-        prev.map((c) => (c.part.id === partId ? { ...c, quantity: qty } : c)),
+        prev.map((c) => {
+          if (c.part.id !== partId) return c;
+
+          const stockQuantity = c.part.stockQuantity ?? 0;
+          const nextQuantity = Math.min(qty, stockQuantity);
+
+          if (qty > stockQuantity) {
+            toast.error(`Only ${stockQuantity} in stock for ${c.part.name}`);
+          }
+
+          return { ...c, quantity: nextQuantity };
+        }),
       );
     }
   };
@@ -216,81 +238,70 @@ const CreateSalesInvoice = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {selectedCustomer?.customer ? (
-                <div className="flex items-center justify-between rounded-md border p-3">
-                  <div>
-                    <div className="font-medium">
-                      {selectedCustomer.customer.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground font-mono">
-                      {selectedCustomer.customer.phoneNumber}
-                    </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  placeholder="Search customer by name, phone, or vehicle number..."
+                  className="pl-9"
+                />
+                {searchingCustomers && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+                )}
+              </div>
+
+              {customerResults.length > 0 ? (
+                <div className="-mx-1 overflow-x-auto pb-2">
+                  <div className="mt-1 flex min-w-max gap-3 px-1">
+                    {customerResults.map((r) => {
+                      const c = r.customer;
+                      const isSelected = c?.id === selectedCustomer?.customer?.id;
+                      if (!c?.id) return null;
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedCustomer(r);
+                            setCustomerSearch("");
+                          }}
+                          className={`w-64 shrink-0 rounded-md border p-3 text-left transition shadow-sm hover:border-primary/50 hover:bg-secondary/30 ${
+                            isSelected
+                              ? "border-primary bg-background shadow-[0_0_0_1px_hsl(var(--primary))]"
+                              : "bg-background"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="truncate font-medium">
+                                {c.name}
+                              </div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                {c.emailAddress ?? "No email"}
+                              </div>
+                            </div>
+                            <User className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          </div>
+                          <div className="mt-2 font-mono text-xs text-muted-foreground">
+                            {c.phoneNumber ?? "-"}
+                          </div>
+                          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                            <Car className="h-3.5 w-3.5" />
+                            {(r.vehicles?.length ?? 0) > 0
+                              ? `${r.vehicles?.length} vehicle${r.vehicles?.length === 1 ? "" : "s"}`
+                              : "No vehicles"}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCustomer(null);
-                      setCustomerSearch("");
-                    }}
-                  >
-                    Change
-                  </Button>
                 </div>
               ) : (
-                <>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={customerSearch}
-                      onChange={(e) => setCustomerSearch(e.target.value)}
-                      placeholder="Search customer by name, phone, or vehicle number..."
-                      className="pl-9"
-                    />
-                    {searchingCustomers && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
-                    )}
+                !searchingCustomers && (
+                  <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                    No customers found.
                   </div>
-                  {debouncedCustomerSearch.length > 0 &&
-                    customerResults.length > 0 && (
-                      <div className="border rounded-md divide-y max-h-60 overflow-y-auto">
-                        {customerResults.map((r) => {
-                          const c = r.customer;
-                          if (!c?.id) return null;
-                          return (
-                            <button
-                              key={c.id}
-                              onClick={() => {
-                                setSelectedCustomer(r);
-                                setCustomerSearch("");
-                              }}
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-secondary/40"
-                            >
-                              <div className="font-medium">{c.name}</div>
-                              <div className="text-xs text-muted-foreground font-mono">
-                                {c.phoneNumber}
-                                {r.vehicles && r.vehicles.length > 0 && (
-                                  <span className="ml-2">
-                                    ·{" "}
-                                    {r.vehicles
-                                      .map((v) => v.vehicleNumber)
-                                      .join(", ")}
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  {debouncedCustomerSearch.length > 0 &&
-                    !searchingCustomers &&
-                    customerResults.length === 0 && (
-                      <div className="text-xs text-muted-foreground px-1">
-                        No customers found.
-                      </div>
-                    )}
-                </>
+                )
               )}
 
               {/* Vehicle picker (only shown when a customer is selected) */}
@@ -302,24 +313,29 @@ const CreateSalesInvoice = () => {
                       This customer has no vehicles on file.
                     </div>
                   ) : (
-                    <Select
-                      value={selectedVehicleId}
-                      onValueChange={setSelectedVehicleId}
-                    >
-                      <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder="Choose a vehicle" />
-                      </SelectTrigger>
-                      <SelectContent>
+                    <div className="-mx-1 mt-2 overflow-x-auto pb-2">
+                      <div className="mt-1 flex min-w-max gap-2 px-1">
                         {customerVehicles.map((v) => (
-                          <SelectItem key={v.id} value={v.id ?? ""}>
-                            <span className="flex items-center gap-2">
-                              <Car className="h-3 w-3" />
-                              {v.vehicleNumber} — {v.make} {v.model} ({v.year})
-                            </span>
-                          </SelectItem>
+                          <button
+                            key={v.id}
+                            onClick={() => setSelectedVehicleId(v.id ?? "")}
+                            className={`w-56 shrink-0 rounded-md border p-3 text-left text-sm transition shadow-sm hover:border-primary/50 hover:bg-secondary/30 ${
+                              selectedVehicleId === v.id
+                                ? "border-primary bg-background shadow-[0_0_0_1px_hsl(var(--primary))]"
+                                : "bg-background"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 font-medium">
+                              <Car className="h-4 w-4 text-muted-foreground" />
+                              {v.vehicleNumber}
+                            </div>
+                            <div className="mt-1 truncate text-xs text-muted-foreground">
+                              {v.make} {v.model} ({v.year})
+                            </div>
+                          </button>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -349,34 +365,59 @@ const CreateSalesInvoice = () => {
                   Loading parts catalogue...
                 </div>
               )}
-              {partSearch && partResults.length > 0 && (
-                <div className="border rounded-md divide-y">
-                  {partResults.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => addToCart(p)}
-                      className="w-full flex items-center justify-between px-3 py-2 text-left text-sm hover:bg-secondary/40"
-                    >
-                      <span>
-                        <span className="font-medium">{p.name}</span>{" "}
-                        <span className="text-xs font-mono text-muted-foreground ml-2">
-                          {p.partNumber}
-                        </span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          · stock: {p.stockQuantity}
-                        </span>
-                      </span>
-                      <span className="tabular text-muted-foreground">
-                        {formatRs(p.sellingPrice ?? 0)}
-                      </span>
-                    </button>
-                  ))}
+              {partResults.length > 0 ? (
+                <div className="-mx-1 overflow-x-auto pb-2">
+                  <div className="flex min-w-max gap-3 px-1">
+                  {partResults.map((p) => {
+                    const stockQuantity = p.stockQuantity ?? 0;
+                    const cartQuantity =
+                      cart.find((line) => line.part.id === p.id)?.quantity ?? 0;
+                    const isDisabled =
+                      stockQuantity <= 0 || cartQuantity >= stockQuantity;
+
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => addToCart(p)}
+                        disabled={isDisabled}
+                        className={`w-60 shrink-0 rounded-md border bg-background p-3 text-left text-sm transition ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-55"
+                            : "hover:border-primary/60 hover:bg-secondary/40"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="truncate font-medium">{p.name}</div>
+                            <div className="truncate font-mono text-xs text-muted-foreground">
+                              {p.partNumber}
+                            </div>
+                          </div>
+                          <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {stockQuantity <= 0
+                              ? "Out of stock"
+                              : cartQuantity > 0
+                                ? `Added: ${cartQuantity}/${stockQuantity}`
+                                : `Stock: ${stockQuantity}`}
+                          </span>
+                          <span className="tabular font-semibold">
+                            {formatRs(p.sellingPrice ?? 0)}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  </div>
                 </div>
-              )}
-              {partSearch && !loadingParts && partResults.length === 0 && (
-                <div className="text-xs text-muted-foreground">
-                  No matching parts.
-                </div>
+              ) : (
+                !loadingParts && (
+                  <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                    No matching parts.
+                  </div>
+                )
               )}
             </CardContent>
           </Card>
@@ -391,7 +432,7 @@ const CreateSalesInvoice = () => {
             <CardContent className="p-0">
               {cart.length === 0 ? (
                 <div className="p-10 text-center text-sm text-muted-foreground">
-                  No items yet. Search and add parts above.
+                  No items yet. Select parts from the horizontal list above.
                 </div>
               ) : (
                 <table className="w-full text-sm">
@@ -420,6 +461,7 @@ const CreateSalesInvoice = () => {
                           <Input
                             type="number"
                             min="1"
+                            max={line.part.stockQuantity ?? undefined}
                             className="w-20 font-mono"
                             value={line.quantity}
                             onChange={(e) =>
